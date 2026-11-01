@@ -76,28 +76,74 @@
   function removePopup(){if(popup){popup.remove();popup=null;}}
   function wordAt(pos){const s=editor.value;let a=pos,b=pos;while(a>0&&/[\w:]/.test(s[a-1]))a--;while(b<s.length&&/[\w:]/.test(s[b]))b++;return s.slice(a,b);}
   function symbols(){const out=[],re=/^\s*(?:([\w:<>,*&]+)\s+)?([A-Za-z_]\w*)\s*\([^;]*\)\s*(?:const\s*)?(?:\{|$)|^\s*(class|struct|enum)\s+([A-Za-z_]\w*)/gm;let m;while((m=re.exec(editor.value))){out.push({name:m[2]||m[4],line:editor.value.slice(0,m.index).split("\n").length,kind:m[3]?"тип":"функция"});}return out;}
-  // Търси дефиниция първо в активния файл, после във всички файлове на проекта.
+  // Разпознава дефиниции на функции, методи, типове и променливи.
+  // Използва съдържанието на проекта, не само файловете в отворените табове.
+  function findSymbolDefinition(source,word){
+    if(!source||!word)return null;
+    const id=word.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+    const functionRe=new RegExp(
+      "(?:^|\\n)[\\t ]*(?:(?:static|inline|virtual|constexpr|explicit|friend|extern)\\s+)*(?:[\\w:~]+(?:\\s*<[^;{}()]+>)?(?:\\s*[*&]+)?[\\t ]+)+(?:(?:[\\w~]+::)*)"+id+
+      "[\\t ]*\\([\\s\\S]*?\\)[\\t ]*(?:const[\\t ]*)?(?:noexcept[\\t ]*)?\\{","m"
+    );
+    let m=functionRe.exec(source);
+    if(m)return {index:m.index,line:source.slice(0,m.index).split("\\n").length,kind:"функция"};
+    const typeWords=new Set(["return","if","else","while","for","switch","case","break","continue","goto","delete","throw","new","sizeof","static_assert","include","define"]);
+    const lines=source.split("\\n");
+    let offset=0;
+    const variableRe=new RegExp(
+      "^[\\t ]*(?:(?:static|extern|const|volatile|constexpr|mutable|register|unsigned|signed|long|short|inline)\\s+)*(?:[A-Za-z_][\\w:]*(?:\\s*<[^;=(){}]+>)?(?:\\s*[*&]+)?)[\\t ]+[*&]?[\\t ]*"+id+
+      "(?:[\\t ]*\\[[^\\]]*\\])?[\\t ]*(?:=|;|,|\\{)",""
+    );
+    for(let i=0;i<lines.length;i++){
+      const line=lines[i];
+      if(/^\\s*(?:\/\/|#include\\b|#pragma\\b)/.test(line)){offset+=line.length+1;continue;}
+      const vm=variableRe.exec(line);
+      if(vm){
+        const prefix=line.slice(0,vm.index).trim();
+        const first=(prefix.match(/[A-Za-z_][\\w]*/) || [""])[0];
+        if(!typeWords.has(first))return {index:offset+vm.index,line:i+1,kind:"променлива"};
+      }
+      offset+=line.length+1;
+    }
+    const typeRe=new RegExp("^[\\t ]*(?:class|struct|enum|typedef)\\s+(?:class\\s+)?"+id+"\\b","m");
+    m=typeRe.exec(source);
+    if(m)return {index:m.index,line:source.slice(0,m.index).split("\\n").length,kind:"тип"};
+    const macroRe=new RegExp("^[\\t ]*#\\s*define\\s+"+id+"\\b","m");
+    m=macroRe.exec(source);
+    if(m)return {index:m.index,line:source.slice(0,m.index).split("\\n").length,kind:"макрос"};
+    return null;
+  }
   function gotoDefinition(word){
     if(!word)return false;
-    const escaped=word.replace(/[^A-Za-z0-9_:]/g,"");
-    const re=new RegExp("^[\\t ]*(?:[\\w:<>,*&]+[\\t ]+)?"+escaped+"[\\t ]*\\(","m");
-    let match=re.exec(editor.value);
-    if(match){gotoLine(editor.value.slice(0,match.index).split("\n").length);return true;}
-    if(window.A7Project){
-      const all=window.A7Project.files();
-      for(let i=0;i<all.length;i++){
-        const file=all[i];
-        if(current()&&file.path===current().path)continue;
-        match=re.exec(file.content||"");
-        if(match){
-          window.A7Project.open(file.path);
-          gotoLine((file.content||"").slice(0,match.index).split("\n").length);
-          setStatus("Дефиниция: "+file.path);
-          return true;
-        }
+    const active=current();
+    const projectFiles=window.A7Project?window.A7Project.files():[];
+    // Вземаме и незапазените редакции от табовете, включително несъхранени файлове.
+    const opened=documents.map(d=>({...d,content:d.id===activeId?editor.value:d.content}));
+    const byPathMap=new Map();
+    projectFiles.forEach(f=>byPathMap.set(f.path,{...f}));
+    opened.forEach(d=>byPathMap.set(d.path,{...byPathMap.get(d.path),...d}));
+    const all=Array.from(byPathMap.values()).filter(f=>/\\.(ino|cpp|c|h|hpp)$/i.test(f.path||f.name||""));
+    // Първо активният файл, след това всички останали файлове в проекта.
+    all.sort((a,b)=>(a.path===(active&&active.path)?-1:0)-(b.path===(active&&active.path)?-1:0));
+    for(const file of all){
+      const found=findSymbolDefinition(file.content||"",word);
+      if(!found)continue;
+      if(active&&file.path===active.path){
+        gotoLine(found.line);
+      }else{
+        window.A7Project.open(file.path);
+        gotoLine(found.line);
       }
+      const lineText=(file.content||"").split("\\n")[found.line-1]||"";
+      const col=lineText.indexOf(word);
+      if(col>=0){
+        const lineStart=(file.content||"").split("\\n").slice(0,found.line-1).reduce((n,x)=>n+x.length+1,0);
+        editor.setSelectionRange(lineStart+col,lineStart+col+word.length);
+      }
+      setStatus("Дефиниция на "+word+" ("+found.kind+"): "+file.path+":"+found.line);
+      return true;
     }
-    setStatus("Няма намерена дефиниция за "+word);
+    setStatus("Няма намерена дефиниция на "+word+" в проекта");
     return false;
   }
   const keywords="void bool byte char int long short float double unsigned signed const static volatile if else for while do switch case break continue return class struct enum typedef using namespace public private protected virtual override constexpr auto sizeof new delete true false HIGH LOW INPUT OUTPUT INPUT_PULLUP";
@@ -141,18 +187,18 @@
   editor.addEventListener("input",()=>{sync();updateCursor();highlight();});
   editor.addEventListener("scroll",()=>{numbers.scrollTop=editor.scrollTop;});
   editor.addEventListener("click",()=>{updateCursor();highlight();});editor.addEventListener("keyup",()=>{updateCursor();highlight();});
-  editor.addEventListener("contextmenu",e=>{e.preventDefault();showContext(e.clientX,e.clientY);});
+  editor.addEventListener("contextmenu",e=>{e.preventDefault();const p=cm.coordsChar({left:e.clientX,top:e.clientY});cm.setCursor(p);showContext(e.clientX,e.clientY);});
   editor.addEventListener("mousemove",e=>{clearTimeout(hintTimer);const pos=editor.selectionStart,w=wordAt(pos);if(!w)return;hintTimer=setTimeout(()=>{const detail=keywords.split(" ").includes(w)?"Ключова дума на C++":builtins.split(" ").includes(w)?"Вградена Arduino функция":"Ctrl+щракване: търси дефиниция";editor.title=w+" — "+detail;},500);});
   editor.addEventListener("mousedown",e=>{
     if(!e.ctrlKey)return;
-    // Вземаме позицията под мишката, а не старата позиция на курсора.
-    let pos=editor.selectionStart;
-    if(document.caretRangeFromPoint){
-      const range=document.caretRangeFromPoint(e.clientX,e.clientY);
-      if(range&&range.startContainer===editor)pos=range.startOffset;
-    }
+    const hit=cm.coordsChar({left:e.clientX,top:e.clientY});
+    const pos=cm.indexFromPos(hit);
     const word=wordAt(pos);
-    if(word){editor.setSelectionRange(pos,pos);if(gotoDefinition(word))e.preventDefault();}
+    if(word){
+      e.preventDefault();
+      cm.setCursor(hit);
+      if(!gotoDefinition(word))setStatus("Не е намерена дефиниция за "+word);
+    }
   });
   editor.addEventListener("keydown",e=>{
     const mod=e.ctrlKey||e.metaKey,k=e.key.toLowerCase();

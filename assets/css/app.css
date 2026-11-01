@@ -139,3 +139,68 @@ body.resizing-row{cursor:row-resize}
  .horizontal-splitter{height:8px;flex-basis:8px}
  .bottom-panel{min-height:80px}
 }
+
+
+/* По-наситена Windows/Visual Studio цветова тема – различими работни зони. */
+:root{
+ --a7-blue:#1769aa;
+ --a7-blue-deep:#124d7c;
+ --a7-blue-soft:#dceeff;
+ --a7-teal:#168b83;
+ --a7-purple:#7057a8;
+ --a7-orange:#d58a24;
+ --a7-green:#23865b;
+}
+.titlebar{
+ background:linear-gradient(105deg,#174f7c 0%,#1769aa 58%,#168b83 100%);
+ color:#fff;border-bottom:0;box-shadow:0 2px 5px #17466a33
+}
+.titlebar .brand,.titlebar .project-title{color:#fff}
+.titlebar .brand-mark{background:#fff;color:#1769aa}
+.titlebar .brand small{color:#d6f4ff}
+.title-actions button{background:#ffffff20;color:#fff;border:1px solid #ffffff70}
+.title-actions button:hover{background:#ffffff38}
+.title-actions .primary{background:#fff;color:#145b91;border-color:#fff;font-weight:700}
+.menubar{background:#e6f1fa;border-bottom:1px solid #a9c9e2}
+.menubar button{color:#174f7c;font-weight:600}
+.menubar button:hover,.menubar button:focus{background:#c9e2f6;color:#073d68}
+.toolbar{background:linear-gradient(90deg,#f2f8fd,#e5f1f9);border-bottom:1px solid #b8d0e3}
+.toolbar button:first-child{background:#e2f3e9;border-color:#8fc8a5;color:#17633c;font-weight:600}
+#btn-upload{background:#fff0dc;border-color:#e6bd82;color:#86500b;font-weight:600}
+#btn-toggle-bottom{background:#eee8fa;border-color:#c6b5e5;color:#59418b}
+.connection-state{background:#e1f2e9;color:#17633c;padding:5px 9px;border:1px solid #b5ddc5;border-radius:12px}
+.explorer{background:linear-gradient(180deg,#edf5fb,#f7fbff);border-right:1px solid #a9c9e2}
+.panel-heading{background:#d8eafa;color:#174f7c;border-bottom:1px solid #b9d3e8}
+.project-root{background:#eaf3fb;color:#174f7c;border-bottom:1px solid #d4e5f2}
+.file-item{border-left:3px solid transparent}
+.file-item:hover{background:#dceeff;color:#124d7c}
+.file-item.active{background:#c9e4f8;color:#073d68;border-left:3px solid #0878c9;font-weight:600}
+.file-icon{color:#bd7b18}
+.explorer-footer{background:#e4eff8;color:#426783}
+.editor-area{background:#fff}
+.tabbar{background:#dfeaf3;border-bottom:1px solid #b7cddd}
+.tab{background:#e9f1f7;color:#31536d;border-right:1px solid #c5d6e3}
+.tab.active{background:#fff;color:#124d7c;border-top:3px solid #168b83;box-shadow:inset 0 -1px #fff;font-weight:600}
+.tab:not(.active):hover{background:#d3e6f5}
+.editor-toolbar{background:#f4f9fd;color:#38617f;border-bottom:1px solid #d7e7f2}
+.line-numbers{background:#edf4f9;color:#65839a;border-right:1px solid #d4e2ec}
+.statusbar{background:linear-gradient(90deg,#1769aa,#168b83);color:#fff}
+.bottom-panel{background:#f2f7fb;border-top:2px solid #7caed2}
+.bottom-tabs{background:#e1edf6;border-bottom:1px solid #b9d0e1}
+.bottom-tabs button{color:#31536d}
+.bottom-tabs button[data-output-tab="output"].selected{color:#1769aa;border-bottom:3px solid #1769aa}
+.bottom-tabs button[data-output-tab="problems"].selected{color:#b36a12;border-bottom:3px solid #d58a24}
+.bottom-tabs button[data-output-tab="serial"].selected{color:#16806f;border-bottom:3px solid #168b83}
+#output-console{background:#fff;color:#25465e;border-top:1px solid #d4e4ef}
+#problems-list{background:#fff7e9}
+#serial-panel{background:#eaf7f4}
+#serial-data{background:#fff;border:1px solid #c5e2da;padding:7px}
+.vertical-splitter{background:#c9ddeb;border-color:#a9c9e2}
+.horizontal-splitter{background:#c9ddeb;border-color:#a9c9e2}
+.vertical-splitter:hover,.vertical-splitter.dragging,.horizontal-splitter:hover,.horizontal-splitter.dragging{background:#63a8d8}
+button,select{transition:background-color .12s,border-color .12s}
+button:active{transform:translateY(1px)}
+@media(max-width:700px){
+ .titlebar{background:linear-gradient(105deg,#174f7c,#1769aa)}
+ .menubar{overflow-x:auto;white-space:nowrap}
+}

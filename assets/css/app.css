@@ -1,0 +1,43 @@
+/* Основна цветова схема в стил настолна среда за разработка. */
+:root{color-scheme:dark;--bg:#1e2229;--panel:#252a33;--panel2:#2b313b;--border:#3a424e;--text:#d8dee9;--muted:#8d99a8;--accent:#4d9de0;--green:#55b88a;--editor:#191d24}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden;background:var(--bg);color:var(--text);font:13px "Segoe UI",Tahoma,Arial,sans-serif}
+button,select{font:inherit;color:inherit;background:#303743;border:1px solid var(--border);border-radius:4px;padding:6px 10px;cursor:pointer}
+button:hover{background:#3a4553;border-color:#596879}
+button:focus,select:focus,textarea:focus{outline:1px solid var(--accent);outline-offset:-1px}
+.titlebar{height:48px;display:flex;align-items:center;gap:22px;padding:0 14px;background:#20252d;border-bottom:1px solid #15191f}
+.brand{display:flex;align-items:center;gap:9px;font-size:15px;font-weight:600;white-space:nowrap}
+.brand-mark{display:grid;place-items:center;width:29px;height:29px;border-radius:7px;background:#168b70;color:white;font-weight:800}
+.brand small{font-size:9px;color:#70c9ac;margin-left:4px;letter-spacing:1px}
+.project-title{color:#aeb8c5;flex:1;text-align:center}
+.title-actions{display:flex;gap:6px}.primary{background:#176f9f;border-color:#2688bb}
+.menubar{height:34px;display:flex;align-items:center;gap:2px;padding:0 10px;background:#252a33;border-bottom:1px solid var(--border)}
+.menubar button{border:0;background:transparent;padding:7px 11px}.menubar button:hover{background:#343c48}
+.toolbar{height:42px;display:flex;align-items:center;gap:8px;padding:0 12px;background:#292f38;border-bottom:1px solid var(--border)}
+.toolbar button{padding:5px 11px}.toolbar label{color:var(--muted);margin-left:8px}.toolbar select{min-width:130px;padding:5px}
+.toolbar-separator{height:23px;border-left:1px solid var(--border);margin:0 4px}
+.connection-state{margin-left:auto;color:#d5b66b;font-size:12px}
+.workspace{height:calc(100% - 48px - 34px - 42px - 164px);min-height:180px;display:flex}
+.explorer{width:225px;min-width:175px;display:flex;flex-direction:column;background:var(--panel);border-right:1px solid var(--border)}
+.panel-heading{height:38px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;color:#9ba7b5;font-size:11px;font-weight:700;letter-spacing:.8px}
+.panel-heading button{padding:2px 8px}
+.project-root{padding:8px 12px;color:#c8d1dc}.project-root span{color:#8f9cac}
+.file-tree{padding:3px 0;overflow:auto;flex:1}.file-item{display:block;width:100%;border:0;border-radius:0;text-align:left;background:transparent;padding:7px 12px 7px 27px;color:#bfc9d5}.file-item:hover,.file-item.active{background:#343e4b;color:#fff}
+.file-icon{display:inline-block;width:20px;color:#d4ad65}.explorer-footer{padding:9px 12px;border-top:1px solid var(--border);font-size:11px;color:var(--muted)}
+.editor-area{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--editor)}
+.tabbar{height:37px;display:flex;overflow-x:auto;background:#252a33;border-bottom:1px solid var(--border)}
+.tab{min-width:110px;max-width:190px;padding:0 12px;display:flex;align-items:center;gap:8px;border-right:1px solid var(--border);color:#aeb8c5;cursor:pointer}
+.tab.active{background:var(--editor);color:#fff;border-top:2px solid var(--accent)}
+.tab .close{margin-left:auto;color:#8491a0}.tab .close:hover{color:white}
+.editor-toolbar{height:29px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;color:#8d99a8;font-size:11px;border-bottom:1px solid #282e37}
+.editor-wrap{display:flex;flex:1;min-height:0;overflow:hidden}
+.line-numbers{width:48px;flex-shrink:0;padding:12px 10px 12px 0;text-align:right;white-space:pre;overflow:hidden;background:#1b2027;color:#657181;font:13px/21px Consolas,monospace;user-select:none}
+#code-editor{flex:1;resize:none;border:0;border-radius:0;background:var(--editor);color:#d7e0ec;padding:12px 14px;font:13px/21px Consolas,"Courier New",monospace;white-space:pre;tab-size:2;overflow:auto;outline:none}
+.statusbar{height:25px;display:flex;align-items:center;gap:20px;padding:0 12px;background:#176f9f;color:white;font-size:11px}
+.statusbar span:first-child{flex:1}
+.bottom-panel{height:164px;background:#222730;border-top:1px solid var(--border);display:flex;flex-direction:column}
+.bottom-tabs{height:36px;display:flex;align-items:center;gap:3px;padding:0 9px;border-bottom:1px solid var(--border)}
+.bottom-tabs button{border:0;background:transparent;color:#9eabb9;padding:7px 11px}.bottom-tabs button.selected{color:white;border-bottom:2px solid var(--accent)}
+.bottom-tabs .spacer{flex:1}
+#output-console{margin:0;padding:10px 14px;overflow:auto;white-space:pre-wrap;color:#b8c5d4;font:12px/1.6 Consolas,monospace;flex:1}
+@media(max-width:700px){.project-title{display:none}.explorer{width:155px;min-width:135px}.toolbar{gap:4px}.toolbar label,.toolbar select{font-size:11px;min-width:80px}.title-actions button{padding:5px}.brand{font-size:13px}}

@@ -27,6 +27,8 @@
     get style(){return wrapper.style;},get title(){return wrapper.title;},set title(v){wrapper.title=v;},
     focus(){cm.focus();},getBoundingClientRect(){return wrapper.getBoundingClientRect();},
     setSelectionRange(s,e){cm.setSelection(cm.posFromIndex(s),cm.posFromIndex(e));},
+    // Премества само текстовия курсор, без да създава маркирана селекция.
+    setCursor(index){cm.setCursor(cm.posFromIndex(index));cm.focus();},
     setRangeText(value,start,end,mode){
       const a=cm.posFromIndex(start),b=cm.posFromIndex(end),text=String(value);
       cm.replaceRange(text,a,b,"+input");
@@ -145,12 +147,16 @@
         // Отварянето на файл активира документа синхронно; след това местим курсора.
         window.A7Project.open(file.path);
       }
-      // Курсорът остава в началото на реда с дефиницията.
-      // Не маркираме името, за да няма оцветяване и визуално неточно позициониране.
+      // Поставяме единичен курсор върху началото на намерената дума.
+      // Използваме setCursor на CodeMirror, а не setSelection, за да няма маркиран текст.
       const sourceLines=(file.content||"").split("\n");
+      const lineText=sourceLines[found.line-1]||"";
+      const col=lineText.indexOf(matchedWord);
       const lineStart=sourceLines.slice(0,found.line-1).reduce((n,line)=>n+line.length+1,0);
-      editor.setSelectionRange(lineStart,lineStart);
-      cm.scrollIntoView(cm.posFromIndex(lineStart),80);
+      const targetIndex=lineStart+(col>=0?col:0);
+      cm.setCursor(cm.posFromIndex(targetIndex));
+      cm.scrollIntoView(cm.posFromIndex(targetIndex),80);
+      cm.focus();
       updateCursor();
       setStatus("Дефиниция на "+word+" ("+found.kind+"): "+file.path+":"+found.line);
       return true;

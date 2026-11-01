@@ -81,12 +81,14 @@
   function findSymbolDefinition(source,word){
     if(!source||!word)return null;
     const id=word.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+    // Разпознава и дефиниции, при които параметрите или отварящата скоба
+    // са на отделни редове, както и методи Class::method и auto trailing return.
     const functionRe=new RegExp(
       "(?:^|\\n)[\\t ]*(?:(?:static|inline|virtual|constexpr|explicit|friend|extern)\\s+)*(?:[\\w:~]+(?:\\s*<[^;{}()]+>)?(?:\\s*[*&]+)?[\\t ]+)+(?:(?:[\\w~]+::)*)"+id+
-      "[\\t ]*\\([\\s\\S]*?\\)[\\t ]*(?:const[\\t ]*)?(?:noexcept[\\t ]*)?\\{","m"
+      "[\\t ]*\\([\\s\\S]*?\\)[\\t ]*(?:(?:const|volatile|override|final)\\b[\\t ]*)*(?:noexcept(?:\\([^)]*\\))?[\\t ]*)?(?:->\\s*[^{};]+)?\\s*\\{","m"
     );
     let m=functionRe.exec(source);
-    if(m)return {index:m.index,line:source.slice(0,m.index).split("\n").length,kind:"функция"};
+    if(m)return {index:m.index,line:source.slice(0,m.index).split("\\n").length,kind:"функция"};
     const typeWords=new Set(["return","if","else","while","for","switch","case","break","continue","goto","delete","throw","new","sizeof","static_assert","include","define"]);
     const lines=source.split("\n");
     let offset=0;
@@ -115,6 +117,10 @@
   }
   function gotoDefinition(word){
     if(!word)return false;
+    // При Class::method търсим точното име, после и последната част.
+    const candidates=[word];
+    const tail=word.split("::").pop();
+    if(tail&&tail!==word)candidates.push(tail);
     const active=current();
     const projectFiles=window.A7Project?window.A7Project.files():[];
     // Вземаме и незапазените редакции от табовете, включително несъхранени файлове.
@@ -126,7 +132,11 @@
     // Първо активният файл, след това всички останали файлове в проекта.
     all.sort((a,b)=>(a.path===(active&&active.path)?-1:0)-(b.path===(active&&active.path)?-1:0));
     for(const file of all){
-      const found=findSymbolDefinition(file.content||"",word);
+      let found=null,matchedWord=word;
+      for(const candidate of candidates){
+        found=findSymbolDefinition(file.content||"",candidate);
+        if(found){matchedWord=candidate;break;}
+      }
       if(!found)continue;
       if(active&&file.path===active.path){
         gotoLine(found.line);
@@ -135,10 +145,10 @@
         gotoLine(found.line);
       }
       const lineText=(file.content||"").split("\n")[found.line-1]||"";
-      const col=lineText.indexOf(word);
+      const col=lineText.indexOf(matchedWord);
       if(col>=0){
         const lineStart=(file.content||"").split("\n").slice(0,found.line-1).reduce((n,x)=>n+x.length+1,0);
-        editor.setSelectionRange(lineStart+col,lineStart+col+word.length);
+        editor.setSelectionRange(lineStart+col,lineStart+col+matchedWord.length);
       }
       setStatus("Дефиниция на "+word+" ("+found.kind+"): "+file.path+":"+found.line);
       return true;

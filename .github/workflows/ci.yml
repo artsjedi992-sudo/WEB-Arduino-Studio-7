@@ -19,6 +19,7 @@ jobs:
           node --check assets/js/project-manager.js
           node --check assets/js/compiler.js
           node --check assets/js/app.js
+          node --check assets/js/panel-layout.js
       - name: Check required web files
         run: |
           test -s index.html

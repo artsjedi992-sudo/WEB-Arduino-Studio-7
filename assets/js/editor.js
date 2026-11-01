@@ -99,7 +99,17 @@
   editor.addEventListener("click",()=>{updateCursor();highlight();});editor.addEventListener("keyup",()=>{updateCursor();highlight();});
   editor.addEventListener("contextmenu",e=>{e.preventDefault();showContext(e.clientX,e.clientY);});
   editor.addEventListener("mousemove",e=>{clearTimeout(hintTimer);const pos=editor.selectionStart,w=wordAt(pos);if(!w)return;hintTimer=setTimeout(()=>{const detail=keywords.split(" ").includes(w)?"Ключова дума на C++":builtins.split(" ").includes(w)?"Вградена Arduino функция":"Ctrl+щракване: търси дефиниция";editor.title=w+" — "+detail;},500);});
-  editor.addEventListener("mousedown",e=>{if(e.ctrlKey){const w=wordAt(editor.selectionStart);if(gotoDefinition(w))e.preventDefault();}});
+  editor.addEventListener("mousedown",e=>{
+    if(!e.ctrlKey)return;
+    // Вземаме позицията под мишката, а не старата позиция на курсора.
+    let pos=editor.selectionStart;
+    if(document.caretRangeFromPoint){
+      const range=document.caretRangeFromPoint(e.clientX,e.clientY);
+      if(range&&range.startContainer===editor)pos=range.startOffset;
+    }
+    const word=wordAt(pos);
+    if(word){editor.setSelectionRange(pos,pos);if(gotoDefinition(word))e.preventDefault();}
+  });
   editor.addEventListener("keydown",e=>{
     const mod=e.ctrlKey||e.metaKey,k=e.key.toLowerCase();
     // Автоматично затваряне на скоби и кавички, както в настолна IDE.
@@ -127,7 +137,7 @@
     if(e.key==="}"&&editor.selectionStart===editor.selectionEnd){
       const p=editor.selectionStart,lineStart=editor.value.lastIndexOf("\n",p-1)+1;
       const before=editor.value.slice(lineStart,p);
-      if(/^\\s{2,}$/.test(before)){e.preventDefault();editor.setRangeText("}",lineStart,p,"end");sync();updateCursor();return;}
+      if(/^\s{2,}$/.test(before)){e.preventDefault();editor.setRangeText("}",lineStart,p,"end");sync();updateCursor();return;}
     }
     if(e.key==="Tab"){e.preventDefault();if(editor.selectionStart!==editor.selectionEnd)indent(true);else replaceSelection("  ");}
     if(mod&&k==="s"){e.preventDefault();window.A7App.save();}

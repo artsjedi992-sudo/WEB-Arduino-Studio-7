@@ -6,7 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#20252d">
   <title>Arduino Studio 7 Web</title>
-  <link rel="stylesheet" href="assets/vendor/codemirror/codemirror.css">\n  <link rel="stylesheet" href="assets/vendor/codemirror/addon/fold/foldgutter.css">\n  <link rel="stylesheet" href="assets/vendor/codemirror/addon/hint/show-hint.css">\n  <link rel="stylesheet" href="assets/css/app.css">
+  <link rel="stylesheet" href="assets/vendor/codemirror/codemirror.css">
+  <link rel="stylesheet" href="assets/vendor/codemirror/addon/fold/foldgutter.css">
+  <link rel="stylesheet" href="assets/vendor/codemirror/addon/hint/show-hint.css">
+  <link rel="stylesheet" href="assets/css/app.css">
 </head>
 <body>
   <!-- Заглавна лента и бързи команди. -->
@@ -66,7 +69,15 @@
   <input id="file-input" type="file" accept=".ino,.h,.hpp,.c,.cpp,.txt,.json" multiple hidden>
   <input id="project-input" type="file" webkitdirectory directory multiple hidden>
   <script src="assets/js/storage.js"></script>
-  <script src="assets/js/syntax.js"></script>
+  <script src="assets/vendor/codemirror/codemirror.js"></script>
+  <script src="assets/vendor/codemirror/mode/clike/clike.js"></script>
+  <script src="assets/vendor/codemirror/addon/fold/foldcode.js"></script>
+  <script src="assets/vendor/codemirror/addon/fold/brace-fold.js"></script>
+  <script src="assets/vendor/codemirror/addon/fold/foldgutter.js"></script>
+  <script src="assets/vendor/codemirror/addon/edit/matchbrackets.js"></script>
+  <script src="assets/vendor/codemirror/addon/selection/active-line.js"></script>
+  <script src="assets/vendor/codemirror/addon/comment/comment.js"></script>
+  <script src="assets/vendor/codemirror/addon/hint/show-hint.js"></script>
   <script src="assets/js/editor.js"></script>
   <script src="assets/js/project-manager.js"></script>
   <script src="assets/js/compiler.js"></script>

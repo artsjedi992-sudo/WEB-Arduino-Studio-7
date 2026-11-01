@@ -50,6 +50,15 @@
  $("serial-connect").onclick=choosePort;$("serial-send-button").onclick=sendSerial;
  $("code-editor").addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="s"){e.preventDefault();save();}});
  window.A7App={save,changed(){status("Има незапазени промени");},askFind,askReplace,showProblems,fileContext};
+ // Превключване на светла/тъмна тема с локално запомняне.
+ const themeButton=$("btn-theme");
+ try{if(localStorage.getItem("a7-theme")==="dark")document.body.classList.add("theme-dark");}catch(e){}
+ if(themeButton)themeButton.onclick=()=>{
+   document.body.classList.toggle("theme-dark");
+   try{localStorage.setItem("a7-theme",document.body.classList.contains("theme-dark")?"dark":"light");}catch(e){}
+   themeButton.textContent=document.body.classList.contains("theme-dark")?"Тъмна":"Светла";
+ };
+ if(themeButton)themeButton.textContent=document.body.classList.contains("theme-dark")?"Тъмна":"Светла";
  buildMenu();serialInfo();showProblems([]);
  window.A7Storage.open().then(()=>window.A7Project.restore()).then(()=>log("Проектът е зареден. Всички файлове се пазят отделно от отворените табове.")).catch(e=>log("Локалното хранилище: "+e.message));
  window.addEventListener("beforeunload",()=>{window.A7Project.save().catch(()=>{});});

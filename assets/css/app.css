@@ -112,3 +112,30 @@ button:focus,select:focus,textarea:focus{outline:1px solid #0078d4;outline-offse
 .a7-popup button{background:transparent;color:#202020}
 .a7-popup button:hover{background:#e5f1fb;color:#111}
 .tree-folder{color:#333}
+
+
+/* Управление размерите и скриването на работните панели. */
+html,body{height:100%;min-height:0}
+body{display:flex;flex-direction:column}
+.workspace{height:auto;flex:1 1 auto;min-height:120px}
+.bottom-panel{height:var(--a7-bottom-height,164px);min-height:90px;max-height:65vh;flex:0 0 var(--a7-bottom-height,164px)}
+.panel-actions{display:flex;align-items:center;gap:4px}
+.panel-actions button{min-width:26px;padding:2px 6px}
+.vertical-splitter{width:5px;flex:0 0 5px;background:#e5e5e5;border-left:1px solid #d0d0d0;border-right:1px solid #d0d0d0;cursor:col-resize;position:relative;z-index:5}
+.vertical-splitter:hover,.vertical-splitter.dragging{background:#9cc9ec}
+.horizontal-splitter{height:6px;flex:0 0 6px;background:#e5e5e5;border-top:1px solid #ccc;border-bottom:1px solid #ccc;cursor:row-resize;position:relative;z-index:5}
+.horizontal-splitter:hover,.horizontal-splitter.dragging{background:#9cc9ec}
+.explorer{width:var(--a7-explorer-width,225px);flex:0 0 var(--a7-explorer-width,225px);min-width:145px}
+body.explorer-collapsed .explorer{display:none}
+body.explorer-collapsed .vertical-splitter{display:none}
+body.bottom-collapsed .bottom-panel,body.bottom-collapsed .horizontal-splitter{display:none}
+body.bottom-collapsed .workspace{flex:1 1 auto}
+body.resizing{user-select:none;cursor:inherit}
+body.resizing-col{cursor:col-resize}
+body.resizing-row{cursor:row-resize}
+@media(max-width:700px){
+ .explorer{width:var(--a7-explorer-width,155px);flex-basis:var(--a7-explorer-width,155px);min-width:115px}
+ .vertical-splitter{width:7px;flex-basis:7px}
+ .horizontal-splitter{height:8px;flex-basis:8px}
+ .bottom-panel{min-height:80px}
+}

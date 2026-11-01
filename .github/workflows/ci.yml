@@ -15,6 +15,7 @@ jobs:
       - name: Check JavaScript syntax
         run: |
           node --check assets/js/storage.js
+          node --check assets/js/syntax.js
           node --check assets/js/editor.js
           node --check assets/js/project-manager.js
           node --check assets/js/compiler.js

@@ -274,3 +274,22 @@ body.theme-dark .tok-string{color:#e9a18f}
 body.theme-dark .tok-comment{color:#8eaa8c}
 body.theme-dark .tok-number{color:#8bd6ad}
 body.theme-dark .tok-preproc{color:#d4a0ff}
+
+/* CodeMirror 5 — основна работна повърхност на редактора. */
+.editor-wrap{position:relative;display:flex;flex:1;min-height:0;overflow:hidden;background:#fff}
+.editor-wrap .CodeMirror{height:100%;width:100%;flex:1;font:14px/21px Consolas,"Courier New",monospace;background:#fff;color:#202020}
+.editor-wrap .CodeMirror-gutters{background:#edf4f9;border-right:1px solid #d4e2ec}
+.editor-wrap .CodeMirror-linenumber{color:#65839a;padding:0 8px 0 5px}
+.editor-wrap .CodeMirror-cursor{border-left:1px solid #111}
+.editor-wrap .CodeMirror-selected{background:#add6ff}
+.editor-wrap .CodeMirror-activeline-background{background:#f1f7fc}
+.editor-wrap .CodeMirror-matchingbracket{color:#111!important;background:#c8f7d2;border-bottom:1px solid #26934a}
+.editor-wrap .CodeMirror-foldgutter{width:14px}
+.editor-wrap .CodeMirror-hints{z-index:10000}
+body.theme-dark .editor-wrap .CodeMirror{background:#171c23;color:#e0e8f0}
+body.theme-dark .editor-wrap .CodeMirror-gutters{background:#202a35;border-color:#354452}
+body.theme-dark .editor-wrap .CodeMirror-linenumber{color:#8295a8}
+body.theme-dark .editor-wrap .CodeMirror-activeline-background{background:#202d3a}
+body.theme-dark .editor-wrap .CodeMirror-cursor{border-left-color:#fff}
+body.theme-dark .editor-wrap .CodeMirror-selected{background:#345878}
+body.theme-dark .editor-wrap .CodeMirror-matchingbracket{color:#fff!important;background:#285b43}

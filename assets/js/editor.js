@@ -32,13 +32,67 @@
   function removePopup(){if(popup){popup.remove();popup=null;}}
   function wordAt(pos){const s=editor.value;let a=pos,b=pos;while(a>0&&/[\w:]/.test(s[a-1]))a--;while(b<s.length&&/[\w:]/.test(s[b]))b++;return s.slice(a,b);}
   function symbols(){const out=[],re=/^\s*(?:([\w:<>,*&]+)\s+)?([A-Za-z_]\w*)\s*\([^;]*\)\s*(?:const\s*)?(?:\{|$)|^\s*(class|struct|enum)\s+([A-Za-z_]\w*)/gm;let m;while((m=re.exec(editor.value))){out.push({name:m[2]||m[4],line:editor.value.slice(0,m.index).split("\n").length,kind:m[3]?"тип":"функция"});}return out;}
-  function gotoDefinition(word){if(!word)return false;const re=new RegExp("^[\\t ]*(?:[\\w:<>,*&]+[\\t ]+)?"+word.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"[\\t ]*\\(","m");const m=re.exec(editor.value);if(m){gotoLine(editor.value.slice(0,m.index).split("\n").length);return true;}return false;}
+  // Търси дефиниция първо в активния файл, после във всички файлове на проекта.
+  function gotoDefinition(word){
+    if(!word)return false;
+    const escaped=word.replace(/[.*+?^${}()|[\\]\\\\]/g,"\\\\$&");
+    const re=new RegExp("^[\\t ]*(?:[\\w:<>,*&]+[\\t ]+)?"+escaped+"[\\t ]*\\(","m");
+    let match=re.exec(editor.value);
+    if(match){gotoLine(editor.value.slice(0,match.index).split("\\n").length);return true;}
+    if(window.A7Project){
+      const all=window.A7Project.files();
+      for(let i=0;i<all.length;i++){
+        const file=all[i];
+        if(current()&&file.path===current().path)continue;
+        match=re.exec(file.content||"");
+        if(match){
+          window.A7Project.open(file.path);
+          gotoLine((file.content||"").slice(0,match.index).split("\\n").length);
+          setStatus("Дефиниция: "+file.path);
+          return true;
+        }
+      }
+    }
+    setStatus("Няма намерена дефиниция за "+word);
+    return false;
+  }
   const keywords="void bool byte char int long short float double unsigned signed const static volatile if else for while do switch case break continue return class struct enum typedef using namespace public private protected virtual override constexpr auto sizeof new delete true false HIGH LOW INPUT OUTPUT INPUT_PULLUP";
   const builtins="pinMode digitalWrite digitalRead analogRead analogWrite delay delayMicroseconds millis micros attachInterrupt detachInterrupt Serial setup loop";
   function escape(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
   function highlight(){/* Изключен е наслагваният слой, който причиняваше двойни и размазани символи. */const old=document.getElementById("syntax-layer");if(old)old.remove();}
 
-  function completion(){const w=wordAt(editor.selectionStart);const list=[...new Set((keywords+" "+builtins+" Serial.begin Serial.println Serial.print analogWrite digitalWrite pinMode INPUT_PULLUP").split(" "))].filter(x=>x.toLowerCase().startsWith(w.toLowerCase())&&x!==w).slice(0,16);if(!list.length)return;popupList(list.map(x=>({label:x,detail:"Arduino / C++"})),it=>{const s=editor.selectionStart-w.length;editor.setRangeText(it.label,s,editor.selectionStart,"end");sync();});}
+  // Автодовършване с често използвани Arduino/C++ шаблони.
+  function completion(){
+    const w=wordAt(editor.selectionStart);
+    const snippets={
+      setup:{label:"setup() — основна инициализация",insert:"void setup() {\\n  \\n}"},
+      loop:{label:"loop() — основен цикъл",insert:"void loop() {\\n  \\n}"},
+      serial:{label:"Serial.begin(9600)",insert:"Serial.begin(9600);"},
+      pinmode:{label:"pinMode(pin, OUTPUT)",insert:"pinMode(, OUTPUT);"},
+      digitalwrite:{label:"digitalWrite(pin, HIGH)",insert:"digitalWrite(, HIGH);"},
+      digitalread:{label:"digitalRead(pin)",insert:"digitalRead()"},
+      analogread:{label:"analogRead(pin)",insert:"analogRead()"},
+      delay:{label:"delay(milliseconds)",insert:"delay();"},
+      for:{label:"for цикъл",insert:"for (int i = 0; i < ; i++) {\\n  \\n}"},
+      if:{label:"if условие",insert:"if () {\\n  \\n}"},
+      while:{label:"while цикъл",insert:"while () {\\n  \\n}"},
+      switch:{label:"switch / case",insert:"switch () {\\n  case :\\n    break;\\n  default:\\n    break;\\n}"},
+      function:{label:"Нова void функция",insert:"void newFunction() {\\n  \\n}"},
+      include:{label:"#include",insert:"#include <>"},
+      serialprint:{label:"Serial.println()",insert:"Serial.println();"}
+    };
+    const base=(keywords+" "+builtins+" Serial.begin Serial.println Serial.print analogWrite digitalWrite pinMode INPUT_PULLUP").split(" ").filter(Boolean);
+    const matches=base.filter(x=>x.toLowerCase().startsWith(w.toLowerCase())&&x!==w).map(x=>({label:x,insert:x,detail:"Arduino / C++"}));
+    Object.keys(snippets).forEach(key=>{if(key.startsWith(w.toLowerCase())||snippets[key].label.toLowerCase().startsWith(w.toLowerCase()))matches.push({...snippets[key],detail:"Готов шаблон"});});
+    const unique=[];const seen=new Set();
+    matches.forEach(item=>{const key=item.label.toLowerCase();if(!seen.has(key)){seen.add(key);unique.push(item);}});
+    if(!unique.length)return;
+    popupList(unique.slice(0,24),it=>{
+      const s=editor.selectionStart-wordAt(editor.selectionStart).length;
+      editor.setRangeText(it.insert,s,editor.selectionStart,"end");
+      sync();updateCursor();
+    });
+  }
   function showContext(x,y){removePopup();const items=[["Изрежи",()=>document.execCommand("cut")],["Копирай",()=>document.execCommand("copy")],["Постави",()=>document.execCommand("paste")],["Дублирай ред/избор",duplicate],["Коментирай / разкоментирай",toggleLineComment],["Огради с /* */",blockComment],["Отиди към дефиниция",()=>gotoDefinition(wordAt(editor.selectionStart))],["Намери",()=>window.A7App.askFind()],["Замени",()=>window.A7App.askReplace()]];popup=document.createElement("div");popup.className="a7-popup";items.forEach(([name,fn])=>{const b=document.createElement("button");b.textContent=name;b.onclick=()=>{fn();removePopup();};popup.append(b);});popup.style.left=Math.min(x,innerWidth-260)+"px";popup.style.top=Math.min(y,innerHeight-340)+"px";document.body.append(popup);}
   editor.addEventListener("input",()=>{sync();updateCursor();highlight();});
   editor.addEventListener("scroll",()=>{numbers.scrollTop=editor.scrollTop;const l=document.getElementById("syntax-layer");if(l){l.scrollTop=editor.scrollTop;l.scrollLeft=editor.scrollLeft;}});

@@ -35,10 +35,10 @@
   // Търси дефиниция първо в активния файл, после във всички файлове на проекта.
   function gotoDefinition(word){
     if(!word)return false;
-    const escaped=word.replace(/[.*+?^${}()|[\\]\\\\]/g,"\\\\$&");
+    const escaped=word.replace(/[.*+?^${}()|[\\]\\]/g,"\\$&");
     const re=new RegExp("^[\\t ]*(?:[\\w:<>,*&]+[\\t ]+)?"+escaped+"[\\t ]*\\(","m");
     let match=re.exec(editor.value);
-    if(match){gotoLine(editor.value.slice(0,match.index).split("\\n").length);return true;}
+    if(match){gotoLine(editor.value.slice(0,match.index).split("\n").length);return true;}
     if(window.A7Project){
       const all=window.A7Project.files();
       for(let i=0;i<all.length;i++){
@@ -47,7 +47,7 @@
         match=re.exec(file.content||"");
         if(match){
           window.A7Project.open(file.path);
-          gotoLine((file.content||"").slice(0,match.index).split("\\n").length);
+          gotoLine((file.content||"").slice(0,match.index).split("\n").length);
           setStatus("Дефиниция: "+file.path);
           return true;
         }
@@ -118,7 +118,7 @@
     // Enter между { } създава правилно подравнен празен ред.
     if(e.key==="Enter"&&editor.selectionStart===editor.selectionEnd&&editor.value[editor.selectionStart-1]==="{"&&editor.value[editor.selectionStart]==="}"){
       e.preventDefault();
-      const p=editor.selectionStart,line=editor.value.slice(0,p).split("\\n").pop(),base=(line.match(/^\\s*/)||[""])[0];
+      const p=editor.selectionStart,line=editor.value.slice(0,p).split("\n").pop(),base=(line.match(/^\\s*/)||[""])[0];
       const insert="\\n"+base+"  "+"\\n"+base;
       editor.setRangeText(insert,p,p,"end");editor.setSelectionRange(p+1+base.length+2,p+1+base.length+2);
       sync();updateCursor();return;

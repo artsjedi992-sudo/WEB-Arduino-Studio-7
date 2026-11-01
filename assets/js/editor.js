@@ -35,7 +35,7 @@
   // Търси дефиниция първо в активния файл, после във всички файлове на проекта.
   function gotoDefinition(word){
     if(!word)return false;
-    const escaped=word.replace(/[.*+?^${}()|[\\]\\]/g,"\\$&");
+    const escaped=word.replace(/[^A-Za-z0-9_:]/g,"");
     const re=new RegExp("^[\\t ]*(?:[\\w:<>,*&]+[\\t ]+)?"+escaped+"[\\t ]*\\(","m");
     let match=re.exec(editor.value);
     if(match){gotoLine(editor.value.slice(0,match.index).split("\n").length);return true;}

@@ -13,7 +13,19 @@
   function add(file){let path=file.path||file.name||"new_file.ino";if(byPath(path)){let n=2,base=path.replace(/(\.[^.]+)?$/,""),ext=(path.match(/\.[^.]+$/)||[""])[0];while(byPath(base+"_"+n+ext))n++;path=base+"_"+n+ext;}const f={path,name:path.split(/[\\/]/).pop(),content:file.content||""};files.push(f);open(path);render();return f;}
   function documentChanged(doc){const f=byPath(doc.path)||byPath(doc.name);if(f)f.content=doc.content;}
   function remove(path){files=files.filter(f=>f.path!==path);if(!files.length)files.push({path:"sketch/sketch.ino",name:"sketch.ino",content:"void setup(){}\nvoid loop(){}\n"});if(activePath===path)open(files[0].path);render();}
-  function importFiles(list){files=[];Array.from(list).forEach(file=>{const path=file.webkitRelativePath||file.name;file.text().then(content=>files.push({path,name:path.split(/[\\/]/).pop(),content})).then(()=>{render();if(files.length===list.length)open(files[0].path);});});}
+  async function importFiles(list){
+    // Изчакваме всички файлове, преди да визуализираме папката.
+    const imported=await Promise.all(Array.from(list).map(async file=>{
+      const path=file.webkitRelativePath||file.name;
+      return {path,name:path.split(/[\\\\/]/).pop(),content:await file.text()};
+    }));
+    if(!imported.length)return;
+    files=imported;
+    activePath=files[0].path;
+    render();
+    open(activePath);
+    await save();
+  }
   function exportProject(){window.A7Editor.getFiles().forEach(d=>{const f=byPath(d.path);if(f)f.content=d.content;});const data=JSON.stringify({name:projectName,files},null,2);const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data],{type:"application/json"}));a.download="arduino-project.json";a.click();URL.revokeObjectURL(a.href);}
   function exportAll(){files.forEach(f=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([f.content],{type:"text/plain;charset=utf-8"}));a.download=f.name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);});}
   window.A7Project={save,restore,add,open,remove,refresh:render,files:()=>files.slice(),documentChanged,importFiles,exportProject,exportAll,activePath:()=>activePath,rename(path,newPath){const f=byPath(path);if(!f||!newPath)return;f.path=newPath;f.name=newPath.split(/[\\/]/).pop();render();}};

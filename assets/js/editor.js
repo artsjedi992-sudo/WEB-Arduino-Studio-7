@@ -156,6 +156,52 @@
     setStatus("Няма намерена дефиниция на "+word+" в проекта");
     return false;
   }
+  // Връща реалния тип/сигнатура на символа за подсказката при посочване.
+  function symbolInfo(word){
+    if(!word)return null;
+    const candidates=[word,word.split("::").pop()].filter((x,i,a)=>x&&a.indexOf(x)===i);
+    const active=current(),map=new Map();
+    (window.A7Project?window.A7Project.files():[]).forEach(f=>map.set(f.path,{...f}));
+    documents.forEach(d=>map.set(d.path,{...map.get(d.path),...d,content:d.id===activeId?editor.value:d.content}));
+    const files=Array.from(map.values()).filter(f=>/\.(ino|cpp|c|h|hpp)$/i.test(f.path||f.name||""));
+    files.sort((a,b)=>(a.path===(active&&active.path)?-1:0)-(b.path===(active&&active.path)?-1:0));
+    for(const file of files){
+      for(const candidate of candidates){
+        const source=file.content||"",found=findSymbolDefinition(source,candidate);
+        if(!found)continue;
+        const lines=source.split("\n"),lineIndex=found.line-1;
+        let declaration=(lines[lineIndex]||"").trim();
+        if(found.kind==="функция"){
+          // Включва продължаващите редове от сигнатурата до отварящата скоба.
+          let end=lineIndex;
+          while(end+1<lines.length&&end-lineIndex<8&&!declaration.includes("{")){
+            end++;
+            declaration+=" "+lines[end].trim();
+          }
+          declaration=declaration.split("{")[0].trim();
+        }
+        declaration=declaration.replace(/\s+/g," ").slice(0,220);
+        return {kind:found.kind,declaration,path:file.path,line:found.line};
+      }
+    }
+    return null;
+  }
+  let hoverTip=null;
+  function showSymbolTip(word,x,y){
+    const info=symbolInfo(word);
+    if(!info)return;
+    if(!hoverTip){
+      hoverTip=document.createElement("div");
+      hoverTip.className="a7-symbol-tooltip";
+      Object.assign(hoverTip.style,{position:"fixed",zIndex:"10000",maxWidth:"520px",padding:"8px 11px",border:"1px solid #7b91aa",borderRadius:"5px",background:"#fffef2",color:"#202a36",boxShadow:"0 4px 14px rgba(0,0,0,.22)",font:"12px/1.5 Consolas,monospace",whiteSpace:"normal",pointerEvents:"none"});
+      document.body.append(hoverTip);
+    }
+    hoverTip.textContent=info.kind.toUpperCase()+" — "+word+"\n"+info.declaration+"\n"+info.path+":"+info.line;
+    hoverTip.style.left=Math.max(8,Math.min(x+14,innerWidth-540))+"px";
+    hoverTip.style.top=Math.max(8,Math.min(y+18,innerHeight-100))+"px";
+    hoverTip.style.display="block";
+  }
+  function hideSymbolTip(){if(hoverTip)hoverTip.style.display="none";}
   const keywords="void bool byte char int long short float double unsigned signed const static volatile if else for while do switch case break continue return class struct enum typedef using namespace public private protected virtual override constexpr auto sizeof new delete true false HIGH LOW INPUT OUTPUT INPUT_PULLUP";
   const builtins="pinMode digitalWrite digitalRead analogRead analogWrite delay delayMicroseconds millis micros attachInterrupt detachInterrupt Serial setup loop";
   function escape(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
@@ -198,7 +244,8 @@
   editor.addEventListener("scroll",()=>{numbers.scrollTop=editor.scrollTop;});
   editor.addEventListener("click",()=>{updateCursor();highlight();});editor.addEventListener("keyup",()=>{updateCursor();highlight();});
   editor.addEventListener("contextmenu",e=>{e.preventDefault();const p=cm.coordsChar({left:e.clientX,top:e.clientY});cm.setCursor(p);showContext(e.clientX,e.clientY);});
-  editor.addEventListener("mousemove",e=>{clearTimeout(hintTimer);const pos=editor.selectionStart,w=wordAt(pos);if(!w)return;hintTimer=setTimeout(()=>{const detail=keywords.split(" ").includes(w)?"Ключова дума на C++":builtins.split(" ").includes(w)?"Вградена Arduino функция":"Ctrl+щракване: търси дефиниция";editor.title=w+" — "+detail;},500);});
+  editor.addEventListener("mousemove",e=>{clearTimeout(hintTimer);const hit=cm.coordsChar({left:e.clientX,top:e.clientY}),pos=cm.indexFromPos(hit),w=wordAt(pos);if(!w){hideSymbolTip();return;}hintTimer=setTimeout(()=>{const info=symbolInfo(w);if(info)showSymbolTip(w,e.clientX,e.clientY);else{hideSymbolTip();const detail=keywords.split(" ").includes(w)?"Ключова дума на C++":builtins.split(" ").includes(w)?"Вградена Arduino функция":"Няма намерена дефиниция";editor.title=w+" — "+detail;}},450);});
+  wrapper.addEventListener("mouseleave",()=>{clearTimeout(hintTimer);hideSymbolTip();});
   editor.addEventListener("mousedown",e=>{
     if(!e.ctrlKey)return;
     const hit=cm.coordsChar({left:e.clientX,top:e.clientY});

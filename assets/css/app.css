@@ -230,3 +230,47 @@ button:active{transform:translateY(1px)}
 .tok-number{color:#098658}
 .tok-preproc{color:#af00db;font-weight:600}
 .tok-bracket{background:#ffe08a;outline:1px solid #d39b25;color:#111!important;font-weight:bold}
+
+
+/* Алтернативна тъмна тема – активира се с бутона „Тема“. */
+body.theme-dark{--bg:#20242b;--panel:#252c35;--panel2:#303946;--border:#414c59;--text:#e2e8f0;--muted:#a0adba;--accent:#4da3e5;--editor:#171c23;background:#20242b;color:#e2e8f0}
+body.theme-dark .titlebar{background:linear-gradient(105deg,#173b5a,#245f91,#176d68);color:#fff}
+body.theme-dark .menubar{background:#283544;border-color:#435568}
+body.theme-dark .menubar button{color:#e4edf6}
+body.theme-dark .menubar button:hover{background:#3b5268}
+body.theme-dark .toolbar{background:#303b48;border-color:#48596b;color:#e5edf5}
+body.theme-dark .toolbar label,body.theme-dark .editor-toolbar{color:#b8c7d6}
+body.theme-dark .explorer{background:#263443;border-color:#40576b}
+body.theme-dark .panel-heading{background:#30485d;color:#e4f1fc;border-color:#45627b}
+body.theme-dark .project-root{background:#293d50;color:#e4f1fc}
+body.theme-dark .file-item{color:#d3deea}
+body.theme-dark .file-item:hover{background:#344e66;color:#fff}
+body.theme-dark .file-item.active{background:#1d527c;color:#fff;border-left-color:#55b5f0}
+body.theme-dark .explorer-footer{background:#263443;color:#aebdcb}
+body.theme-dark .tabbar{background:#273442;border-color:#425466}
+body.theme-dark .tab{background:#303e4c;color:#cbd8e4;border-color:#48596a}
+body.theme-dark .tab.active{background:#171c23;color:#fff}
+body.theme-dark .editor-toolbar,body.theme-dark .editor-wrap{background:#171c23;color:#bdcad7}
+body.theme-dark .line-numbers{background:#202a35;color:#8295a8;border-color:#354452}
+body.theme-dark #code-editor{background:transparent!important;color:transparent!important;caret-color:#fff}
+body.theme-dark #syntax-layer{background:#171c23;color:#e0e8f0}
+body.theme-dark .statusbar{background:linear-gradient(90deg,#185b8d,#176d68)}
+body.theme-dark .bottom-panel{background:#222d38;border-color:#486078}
+body.theme-dark .bottom-tabs{background:#2b3b4b;border-color:#46596b}
+body.theme-dark .bottom-tabs button{color:#d0dce7}
+body.theme-dark #output-console,body.theme-dark #problems-list,body.theme-dark #serial-panel{background:#171f28;color:#dce6ef}
+body.theme-dark #serial-data{background:#202a35;color:#e4edf5;border-color:#46596b}
+body.theme-dark .vertical-splitter,body.theme-dark .horizontal-splitter{background:#3b5267;border-color:#526c82}
+body.theme-dark button,body.theme-dark select{background:#354454;color:#e5edf5;border-color:#52677b}
+body.theme-dark button:hover,body.theme-dark select:hover{background:#435b72}
+body.theme-dark .a7-popup{background:#263443;color:#e5edf5;border-color:#52677b}
+body.theme-dark .a7-popup button{color:#e5edf5}
+body.theme-dark .a7-popup button:hover{background:#3b5268;color:#fff}
+body.theme-dark .tok-keyword{color:#80b5ff}
+body.theme-dark .tok-type{color:#70c6e8}
+body.theme-dark .tok-builtin{color:#c5a0f0}
+body.theme-dark .tok-function{color:#e8cb86}
+body.theme-dark .tok-string{color:#e9a18f}
+body.theme-dark .tok-comment{color:#8eaa8c}
+body.theme-dark .tok-number{color:#8bd6ad}
+body.theme-dark .tok-preproc{color:#d4a0ff}

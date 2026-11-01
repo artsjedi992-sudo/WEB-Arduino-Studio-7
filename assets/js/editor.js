@@ -48,6 +48,33 @@
   editor.addEventListener("mousedown",e=>{if(e.ctrlKey){const w=wordAt(editor.selectionStart);if(gotoDefinition(w))e.preventDefault();}});
   editor.addEventListener("keydown",e=>{
     const mod=e.ctrlKey||e.metaKey,k=e.key.toLowerCase();
+    // Автоматично затваряне на скоби и кавички, както в настолна IDE.
+    const pairs={"(":")","[":"]","{":"}","\"":"\"","'":"'"}; 
+    if(!mod&&pairs[e.key]&&editor.selectionStart===editor.selectionEnd){
+      e.preventDefault();
+      const close=pairs[e.key],p=editor.selectionStart;
+      editor.setRangeText(e.key+close,p,p,"end");
+      editor.setSelectionRange(p+1,p+1);
+      sync();updateCursor();return;
+    }
+    // При въвеждане на затваряща скоба прескача вече добавената автоматично скоба.
+    if(!mod&&[")","]","}","\"","'"].includes(e.key)&&editor.selectionStart===editor.selectionEnd&&editor.value[editor.selectionStart]===e.key){
+      e.preventDefault();editor.setSelectionRange(editor.selectionStart+1,editor.selectionStart+1);updateCursor();return;
+    }
+    // Enter между { } създава правилно подравнен празен ред.
+    if(e.key==="Enter"&&editor.selectionStart===editor.selectionEnd&&editor.value[editor.selectionStart-1]==="{"&&editor.value[editor.selectionStart]==="}"){
+      e.preventDefault();
+      const p=editor.selectionStart,line=editor.value.slice(0,p).split("\\n").pop(),base=(line.match(/^\\s*/)||[""])[0];
+      const insert="\\n"+base+"  "+"\\n"+base;
+      editor.setRangeText(insert,p,p,"end");editor.setSelectionRange(p+1+base.length+2,p+1+base.length+2);
+      sync();updateCursor();return;
+    }
+    // Автоматичен отстъп за затваряща }.
+    if(e.key==="}"&&editor.selectionStart===editor.selectionEnd){
+      const p=editor.selectionStart,lineStart=editor.value.lastIndexOf("\\n",p-1)+1;
+      const before=editor.value.slice(lineStart,p);
+      if(/^\\s{2,}$/.test(before)){e.preventDefault();editor.setRangeText("}",lineStart,p,"end");sync();updateCursor();return;}
+    }
     if(e.key==="Tab"){e.preventDefault();if(editor.selectionStart!==editor.selectionEnd)indent(true);else replaceSelection("  ");}
     if(mod&&k==="s"){e.preventDefault();window.A7App.save();}
     if(mod&&k==="space"){e.preventDefault();completion();}

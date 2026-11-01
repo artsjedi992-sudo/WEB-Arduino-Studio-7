@@ -65,19 +65,19 @@
   function completion(){
     const w=wordAt(editor.selectionStart);
     const snippets={
-      setup:{label:"setup() — основна инициализация",insert:"void setup() {\\n  \\n}"},
-      loop:{label:"loop() — основен цикъл",insert:"void loop() {\\n  \\n}"},
+      setup:{label:"setup() — основна инициализация",insert:"void setup() {\n  \n}"},
+      loop:{label:"loop() — основен цикъл",insert:"void loop() {\n  \n}"},
       serial:{label:"Serial.begin(9600)",insert:"Serial.begin(9600);"},
       pinmode:{label:"pinMode(pin, OUTPUT)",insert:"pinMode(, OUTPUT);"},
       digitalwrite:{label:"digitalWrite(pin, HIGH)",insert:"digitalWrite(, HIGH);"},
       digitalread:{label:"digitalRead(pin)",insert:"digitalRead()"},
       analogread:{label:"analogRead(pin)",insert:"analogRead()"},
       delay:{label:"delay(milliseconds)",insert:"delay();"},
-      for:{label:"for цикъл",insert:"for (int i = 0; i < ; i++) {\\n  \\n}"},
-      if:{label:"if условие",insert:"if () {\\n  \\n}"},
-      while:{label:"while цикъл",insert:"while () {\\n  \\n}"},
-      switch:{label:"switch / case",insert:"switch () {\\n  case :\\n    break;\\n  default:\\n    break;\\n}"},
-      function:{label:"Нова void функция",insert:"void newFunction() {\\n  \\n}"},
+      for:{label:"for цикъл",insert:"for (int i = 0; i < ; i++) {\n  \n}"},
+      if:{label:"if условие",insert:"if () {\n  \n}"},
+      while:{label:"while цикъл",insert:"while () {\n  \n}"},
+      switch:{label:"switch / case",insert:"switch () {\n  case :\n    break;\n  default:\n    break;\n}"},
+      function:{label:"Нова void функция",insert:"void newFunction() {\n  \n}"},
       include:{label:"#include",insert:"#include <>"},
       serialprint:{label:"Serial.println()",insert:"Serial.println();"}
     };
@@ -118,14 +118,14 @@
     // Enter между { } създава правилно подравнен празен ред.
     if(e.key==="Enter"&&editor.selectionStart===editor.selectionEnd&&editor.value[editor.selectionStart-1]==="{"&&editor.value[editor.selectionStart]==="}"){
       e.preventDefault();
-      const p=editor.selectionStart,line=editor.value.slice(0,p).split("\n").pop(),base=(line.match(/^\\s*/)||[""])[0];
-      const insert="\\n"+base+"  "+"\\n"+base;
+      const p=editor.selectionStart,line=editor.value.slice(0,p).split("\n").pop(),base=(line.match(/^\s*/)||[""])[0];
+      const insert="\n"+base+"  "+"\n"+base;
       editor.setRangeText(insert,p,p,"end");editor.setSelectionRange(p+1+base.length+2,p+1+base.length+2);
       sync();updateCursor();return;
     }
     // Автоматичен отстъп за затваряща }.
     if(e.key==="}"&&editor.selectionStart===editor.selectionEnd){
-      const p=editor.selectionStart,lineStart=editor.value.lastIndexOf("\\n",p-1)+1;
+      const p=editor.selectionStart,lineStart=editor.value.lastIndexOf("\n",p-1)+1;
       const before=editor.value.slice(lineStart,p);
       if(/^\\s{2,}$/.test(before)){e.preventDefault();editor.setRangeText("}",lineStart,p,"end");sync();updateCursor();return;}
     }

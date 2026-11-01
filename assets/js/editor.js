@@ -88,7 +88,7 @@
       "[\\t ]*\\([\\s\\S]*?\\)[\\t ]*(?:(?:const|volatile|override|final)\\b[\\t ]*)*(?:noexcept(?:\\([^)]*\\))?[\\t ]*)?(?:->\\s*[^{};]+)?\\s*\\{","m"
     );
     let m=functionRe.exec(source);
-    if(m)return {index:m.index,line:source.slice(0,m.index).split("\\n").length,kind:"функция"};
+    if(m)return {index:m.index,line:source.slice(0,m.index).split("\n").length,kind:"функция"};
     const typeWords=new Set(["return","if","else","while","for","switch","case","break","continue","goto","delete","throw","new","sizeof","static_assert","include","define"]);
     const lines=source.split("\n");
     let offset=0;

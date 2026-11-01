@@ -1,7 +1,51 @@
 /* Редакторът управлява много документи, редактиране, подсказки и навигация. */
 (function(){
   "use strict";
-  const editor=document.getElementById("code-editor"), numbers=document.getElementById("line-numbers");
+  const textarea=document.getElementById("code-editor"), numbers=document.getElementById("line-numbers");
+  // CodeMirror 5 заменя стария textarea-overlay редактор; API адаптерът запазва
+  // съвместимостта с командите на Arduino Studio 7.
+  const cm=CodeMirror.fromTextArea(textarea,{
+    mode:"text/x-c++src",theme:"default",lineNumbers:true,indentUnit:2,tabSize:2,
+    indentWithTabs:false,lineWrapping:false,matchBrackets:true,styleActiveLine:true,
+    foldGutter:true,gutters:["CodeMirror-linenumbers","CodeMirror-foldgutter"],
+    autofocus:false,viewportMargin:20,extraKeys:{
+      "Ctrl-/":"toggleComment","Cmd-/":"toggleComment",
+      "Ctrl-Space":function(editor){if(window.A7Editor)window.A7Editor.complete();},
+      "Ctrl-Q":"toggleComment"
+    }
+  });
+  const wrapper=cm.getWrapperElement(),inputField=cm.getInputField();
+  numbers.style.display="none";
+  const editor={
+    get value(){return cm.getValue();},set value(v){cm.setValue(v==null?"":String(v));},
+    get selectionStart(){return cm.indexFromPos(cm.getCursor("from"));},
+    get selectionEnd(){return cm.indexFromPos(cm.getCursor("to"));},
+    set selectionStart(v){const p=cm.posFromIndex(v);cm.setCursor(p);},
+    set selectionEnd(v){const p=cm.posFromIndex(v);cm.setCursor(p);},
+    get scrollTop(){return cm.getScrollInfo().top;},set scrollTop(v){cm.scrollTo(null,v);},
+    get scrollLeft(){return cm.getScrollInfo().left;},set scrollLeft(v){cm.scrollTo(v,null);},
+    get style(){return wrapper.style;},get title(){return wrapper.title;},set title(v){wrapper.title=v;},
+    focus(){cm.focus();},getBoundingClientRect(){return wrapper.getBoundingClientRect();},
+    setSelectionRange(s,e){cm.setSelection(cm.posFromIndex(s),cm.posFromIndex(e));},
+    setRangeText(value,start,end,mode){
+      const a=cm.posFromIndex(start),b=cm.posFromIndex(end),text=String(value);
+      cm.replaceRange(text,a,b,"+input");
+      const finish=start+text.length;
+      if(mode==="select")cm.setSelection(cm.posFromIndex(start),cm.posFromIndex(finish));
+      else if(mode==="start")cm.setCursor(cm.posFromIndex(start));
+      else cm.setCursor(cm.posFromIndex(finish));
+    },
+    addEventListener(type,fn){
+      const send=(event)=>fn(event||{target:textarea});
+      if(type==="input"){cm.on("change",()=>send({target:textarea}));return;}
+      if(type==="scroll"){cm.on("scroll",()=>send({target:textarea}));return;}
+      if(type==="click"){wrapper.addEventListener(type,send);return;}
+      if(type==="contextmenu"||type==="mousemove"||type==="mousedown"){wrapper.addEventListener(type,send);return;}
+      if(type==="keydown"||type==="keyup"){inputField.addEventListener(type,send);return;}
+      wrapper.addEventListener(type,send);
+    }
+  };
+
   const tabs=document.getElementById("tabbar"), label=document.getElementById("active-file-label");
   const cursor=document.getElementById("cursor-position");
   let documents=[], activeId=null, bookmarks=new Map(), hintTimer=null, popup=null, context=null, fontSize=13, wrap=false;
@@ -59,7 +103,7 @@
   const keywords="void bool byte char int long short float double unsigned signed const static volatile if else for while do switch case break continue return class struct enum typedef using namespace public private protected virtual override constexpr auto sizeof new delete true false HIGH LOW INPUT OUTPUT INPUT_PULLUP";
   const builtins="pinMode digitalWrite digitalRead analogRead analogWrite delay delayMicroseconds millis micros attachInterrupt detachInterrupt Serial setup loop";
   function escape(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
-  function highlight(){if(window.A7Syntax)window.A7Syntax.render(editor);}
+  function highlight(){ /* CodeMirror извършва синтактичното оцветяване чрез C-like mode. */ }
 
   // Автодовършване с често използвани Arduino/C++ шаблони.
   function completion(){
@@ -95,7 +139,7 @@
   }
   function showContext(x,y){removePopup();const items=[["Изрежи",()=>document.execCommand("cut")],["Копирай",()=>document.execCommand("copy")],["Постави",()=>document.execCommand("paste")],["Дублирай ред/избор",duplicate],["Коментирай / разкоментирай",toggleLineComment],["Огради с /* */",blockComment],["Отиди към дефиниция",()=>gotoDefinition(wordAt(editor.selectionStart))],["Намери",()=>window.A7App.askFind()],["Замени",()=>window.A7App.askReplace()]];popup=document.createElement("div");popup.className="a7-popup";items.forEach(([name,fn])=>{const b=document.createElement("button");b.textContent=name;b.onclick=()=>{fn();removePopup();};popup.append(b);});popup.style.left=Math.min(x,innerWidth-260)+"px";popup.style.top=Math.min(y,innerHeight-340)+"px";document.body.append(popup);}
   editor.addEventListener("input",()=>{sync();updateCursor();highlight();});
-  editor.addEventListener("scroll",()=>{numbers.scrollTop=editor.scrollTop;const l=document.getElementById("syntax-layer");if(l){l.scrollTop=editor.scrollTop;l.scrollLeft=editor.scrollLeft;}});
+  editor.addEventListener("scroll",()=>{numbers.scrollTop=editor.scrollTop;});
   editor.addEventListener("click",()=>{updateCursor();highlight();});editor.addEventListener("keyup",()=>{updateCursor();highlight();});
   editor.addEventListener("contextmenu",e=>{e.preventDefault();showContext(e.clientX,e.clientY);});
   editor.addEventListener("mousemove",e=>{clearTimeout(hintTimer);const pos=editor.selectionStart,w=wordAt(pos);if(!w)return;hintTimer=setTimeout(()=>{const detail=keywords.split(" ").includes(w)?"Ключова дума на C++":builtins.split(" ").includes(w)?"Вградена Arduino функция":"Ctrl+щракване: търси дефиниция";editor.title=w+" — "+detail;},500);});
@@ -150,5 +194,5 @@
     if(e.key==="Escape")removePopup();
     if(e.key==="Enter"){const p=editor.selectionStart,ln=editor.value.slice(0,p).split("\n").pop(),indent=(ln.match(/^\s*/)||[""])[0];setTimeout(()=>{editor.setRangeText(indent,editor.selectionStart,editor.selectionStart,"end");sync();},0);}
   });
-  window.A7Editor={add,activate,close,closeOthers,files:()=>documents,current,replaceAll(list){documents=[];activeId=null;list.forEach(add);if(!list.length){editor.value="";renderTabs();}},getFiles(){if(current())current().content=editor.value;return documents.map(d=>({...d}));},findNext,replaceAllText:replaceAll,gotoLine,duplicate,toggleCommentSelection:toggleLineComment,toggleBlockComment:blockComment,indentSelection:indent,moveCurrentLine:moveLine,trimTrailingWhitespace(){editor.value=editor.value.split("\n").map(x=>x.replace(/[ \t]+$/g,"")).join("\n");sync();},sortSelectedLines(){const r=selectedLines();replaceRange(r.start,r.end,r.text.split("\n").sort().join("\n"));},changeSelectionCase(upper){const s=editor.selectionStart,e=editor.selectionEnd;replaceRange(s,e,upper?editor.value.slice(s,e).toUpperCase():editor.value.slice(s,e).toLowerCase());},insertDateTime(){replaceSelection(new Date().toLocaleString());},toggleBookmark(){const line=editor.value.slice(0,editor.selectionStart).split("\n").length-1;const set=bookmarks.get(activeId)||new Set();set.has(line)?set.delete(line):set.add(line);bookmarks.set(activeId,set);setStatus("Отметка за ред "+(line+1));},nextBookmark(){const set=[...(bookmarks.get(activeId)||[])].sort((a,b)=>a-b),line=editor.value.slice(0,editor.selectionStart).split("\n").length-1,n=set.find(x=>x>line)??set[0];if(n!==undefined)gotoLine(n+1);},clearBookmarks(){bookmarks.set(activeId,new Set());},symbols,gotoDefinition,changeFont(delta){fontSize=Math.max(9,Math.min(28,fontSize+delta));editor.style.fontSize=fontSize+"px";editor.style.lineHeight=(fontSize*1.62)+"px";numbers.style.fontSize=fontSize+"px";},toggleWordWrap(){wrap=!wrap;editor.style.whiteSpace=wrap?"pre-wrap":"pre";editor.style.overflowX=wrap?"hidden":"auto";},resetFont(){fontSize=13;editor.style.fontSize="13px";editor.style.lineHeight="21px";},saveAll(){documents.forEach(d=>{d.content=d.id===activeId?editor.value:d.content;d.dirty=false;});renderTabs();},refresh:highlight};
+  window.A7Editor={add,activate,close,closeOthers,files:()=>documents,current,getValue:()=>cm.getValue(),complete:completion,replaceAll(list){documents=[];activeId=null;list.forEach(add);if(!list.length){editor.value="";renderTabs();}},getFiles(){if(current())current().content=editor.value;return documents.map(d=>({...d}));},findNext,replaceAllText:replaceAll,gotoLine,duplicate,toggleCommentSelection:toggleLineComment,toggleBlockComment:blockComment,indentSelection:indent,moveCurrentLine:moveLine,trimTrailingWhitespace(){editor.value=editor.value.split("\n").map(x=>x.replace(/[ \t]+$/g,"")).join("\n");sync();},sortSelectedLines(){const r=selectedLines();replaceRange(r.start,r.end,r.text.split("\n").sort().join("\n"));},changeSelectionCase(upper){const s=editor.selectionStart,e=editor.selectionEnd;replaceRange(s,e,upper?editor.value.slice(s,e).toUpperCase():editor.value.slice(s,e).toLowerCase());},insertDateTime(){replaceSelection(new Date().toLocaleString());},toggleBookmark(){const line=editor.value.slice(0,editor.selectionStart).split("\n").length-1;const set=bookmarks.get(activeId)||new Set();set.has(line)?set.delete(line):set.add(line);bookmarks.set(activeId,set);setStatus("Отметка за ред "+(line+1));},nextBookmark(){const set=[...(bookmarks.get(activeId)||[])].sort((a,b)=>a-b),line=editor.value.slice(0,editor.selectionStart).split("\n").length-1,n=set.find(x=>x>line)??set[0];if(n!==undefined)gotoLine(n+1);},clearBookmarks(){bookmarks.set(activeId,new Set());},symbols,gotoDefinition,changeFont(delta){fontSize=Math.max(9,Math.min(28,fontSize+delta));editor.style.fontSize=fontSize+"px";editor.style.lineHeight=(fontSize*1.62)+"px";numbers.style.fontSize=fontSize+"px";},toggleWordWrap(){wrap=!wrap;editor.style.whiteSpace=wrap?"pre-wrap":"pre";editor.style.overflowX=wrap?"hidden":"auto";},resetFont(){fontSize=13;editor.style.fontSize="13px";editor.style.lineHeight="21px";},saveAll(){documents.forEach(d=>{d.content=d.id===activeId?editor.value:d.content;d.dirty=false;});renderTabs();},refresh:highlight};
 })();

@@ -10,7 +10,7 @@
  function download(name,text,type){const a=document.createElement("a"),url=URL.createObjectURL(new Blob([text],{type:type||"text/plain;charset=utf-8"}));a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1200);}
  async function saveActive(){
   const d=window.A7Editor.current();if(!d)return;
-  d.content=$("code-editor").value;
+  d.content=window.A7Editor.getValue();
   window.A7Project.documentChanged(d);
   try{await window.A7Project.save();download(d.name,d.content);status("Файлът е записан и изтеглен: "+d.name);}
   catch(e){log("Грешка при запис: "+e.message);}

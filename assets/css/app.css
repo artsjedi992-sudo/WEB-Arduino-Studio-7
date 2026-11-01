@@ -49,7 +49,7 @@ button:focus,select:focus,textarea:focus{outline:1px solid var(--accent);outline
 .a7-popup button:hover{background:#dce9f8;color:#14283d}
 .editor-wrap{position:relative}
 #code-editor{position:relative;z-index:2;background:transparent;color:#e2e8f0;caret-color:#fff}
-#syntax-layer{position:absolute;z-index:1;inset:0;margin:0;padding:12px 14px;overflow:hidden;pointer-events:none;white-space:pre;tab-size:2;font:13px/21px Consolas,"Courier New",monospace;color:#d7e0ec}
+#syntax-layer{position:absolute;z-index:1;left:48px;right:0;top:0;bottom:0;margin:0;padding:12px 14px;overflow:hidden;pointer-events:none;white-space:pre;tab-size:2;font:13px/21px Consolas,"Courier New",monospace;color:#d7e0ec}
 .tok-key{color:#77aaff;font-weight:600}.tok-builtin{color:#65c6b2}.tok-string{color:#d69b72}.tok-comment{color:#82917f}.tok-number{color:#c69be8}
 #code-editor::selection{background:#466b9a88}
 .tree-folder{padding:7px 12px;color:#d2dbe7;font-weight:600}

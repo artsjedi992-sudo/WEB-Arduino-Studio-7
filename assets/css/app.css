@@ -41,3 +41,23 @@ button:focus,select:focus,textarea:focus{outline:1px solid var(--accent);outline
 .bottom-tabs .spacer{flex:1}
 #output-console{margin:0;padding:10px 14px;overflow:auto;white-space:pre-wrap;color:#b8c5d4;font:12px/1.6 Consolas,monospace;flex:1}
 @media(max-width:700px){.project-title{display:none}.explorer{width:155px;min-width:135px}.toolbar{gap:4px}.toolbar label,.toolbar select{font-size:11px;min-width:80px}.title-actions button{padding:5px}.brand{font-size:13px}}
+
+/* Допълнителни визуални елементи за пълната IDE функционалност. */
+.menubar{position:relative;z-index:20}
+.a7-popup{position:fixed;z-index:9999;min-width:220px;max-width:330px;max-height:65vh;overflow:auto;padding:5px;background:#f5f7fa;color:#202632;border:1px solid #9ba8b7;border-radius:5px;box-shadow:0 8px 28px #0008}
+.a7-popup button{display:block;width:100%;text-align:left;border:0;border-radius:3px;background:transparent;color:#202632;padding:7px 10px;white-space:normal}
+.a7-popup button:hover{background:#dce9f8;color:#14283d}
+.editor-wrap{position:relative}
+#code-editor{position:relative;z-index:2;background:transparent;color:#e2e8f0;caret-color:#fff}
+#syntax-layer{position:absolute;z-index:1;inset:0;margin:0;padding:12px 14px;overflow:hidden;pointer-events:none;white-space:pre;tab-size:2;font:13px/21px Consolas,"Courier New",monospace;color:#d7e0ec}
+.tok-key{color:#77aaff;font-weight:600}.tok-builtin{color:#65c6b2}.tok-string{color:#d69b72}.tok-comment{color:#82917f}.tok-number{color:#c69be8}
+#code-editor::selection{background:#466b9a88}
+.tree-folder{padding:7px 12px;color:#d2dbe7;font-weight:600}
+.file-item.active{background:#34465b;color:#fff}
+.bottom-panel [hidden]{display:none!important}
+#problems-list,#serial-panel{padding:8px 12px;overflow:auto;flex:1;color:#bdc8d6}
+.problem-item{display:block;width:100%;text-align:left;margin:2px 0;background:transparent;border:0;color:#e2b878}
+.serial-actions{display:flex;gap:6px;margin-top:7px}
+.serial-actions input{flex:1;min-width:0;background:#171c23;color:#eee;border:1px solid var(--border);padding:6px}
+#serial-data{white-space:pre-wrap;max-height:90px;overflow:auto}
+@media(max-width:700px){.a7-popup{max-width:85vw}.toolbar{overflow-x:auto;white-space:nowrap}}

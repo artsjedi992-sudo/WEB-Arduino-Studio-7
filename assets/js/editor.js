@@ -100,7 +100,7 @@
       const vm=variableRe.exec(line);
       if(vm){
         const prefix=line.slice(0,vm.index).trim();
-        const first=(prefix.match(/[A-Za-z_][\\w]*/) || [""])[0];
+        const first=(prefix.match(/[A-Za-z_][\w]*/) || [""])[0];
         if(!typeWords.has(first))return {index:offset+vm.index,line:i+1,kind:"променлива"};
       }
       offset+=line.length+1;
@@ -122,7 +122,7 @@
     const byPathMap=new Map();
     projectFiles.forEach(f=>byPathMap.set(f.path,{...f}));
     opened.forEach(d=>byPathMap.set(d.path,{...byPathMap.get(d.path),...d}));
-    const all=Array.from(byPathMap.values()).filter(f=>/\\.(ino|cpp|c|h|hpp)$/i.test(f.path||f.name||""));
+    const all=Array.from(byPathMap.values()).filter(f=>/\.(ino|cpp|c|h|hpp)$/i.test(f.path||f.name||""));
     // Първо активният файл, след това всички останали файлове в проекта.
     all.sort((a,b)=>(a.path===(active&&active.path)?-1:0)-(b.path===(active&&active.path)?-1:0));
     for(const file of all){

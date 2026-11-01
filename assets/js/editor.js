@@ -86,9 +86,9 @@
       "[\\t ]*\\([\\s\\S]*?\\)[\\t ]*(?:const[\\t ]*)?(?:noexcept[\\t ]*)?\\{","m"
     );
     let m=functionRe.exec(source);
-    if(m)return {index:m.index,line:source.slice(0,m.index).split("\\n").length,kind:"функция"};
+    if(m)return {index:m.index,line:source.slice(0,m.index).split("\n").length,kind:"функция"};
     const typeWords=new Set(["return","if","else","while","for","switch","case","break","continue","goto","delete","throw","new","sizeof","static_assert","include","define"]);
-    const lines=source.split("\\n");
+    const lines=source.split("\n");
     let offset=0;
     const variableRe=new RegExp(
       "^[\\t ]*(?:(?:static|extern|const|volatile|constexpr|mutable|register|unsigned|signed|long|short|inline)\\s+)*(?:[A-Za-z_][\\w:]*(?:\\s*<[^;=(){}]+>)?(?:\\s*[*&]+)?)[\\t ]+[*&]?[\\t ]*"+id+
@@ -96,7 +96,7 @@
     );
     for(let i=0;i<lines.length;i++){
       const line=lines[i];
-      if(/^\\s*(?:\/\/|#include\\b|#pragma\\b)/.test(line)){offset+=line.length+1;continue;}
+      if(/^\s*(?:\/\/|#include\b|#pragma\b)/.test(line)){offset+=line.length+1;continue;}
       const vm=variableRe.exec(line);
       if(vm){
         const prefix=line.slice(0,vm.index).trim();
@@ -107,10 +107,10 @@
     }
     const typeRe=new RegExp("^[\\t ]*(?:class|struct|enum|typedef)\\s+(?:class\\s+)?"+id+"\\b","m");
     m=typeRe.exec(source);
-    if(m)return {index:m.index,line:source.slice(0,m.index).split("\\n").length,kind:"тип"};
+    if(m)return {index:m.index,line:source.slice(0,m.index).split("\n").length,kind:"тип"};
     const macroRe=new RegExp("^[\\t ]*#\\s*define\\s+"+id+"\\b","m");
     m=macroRe.exec(source);
-    if(m)return {index:m.index,line:source.slice(0,m.index).split("\\n").length,kind:"макрос"};
+    if(m)return {index:m.index,line:source.slice(0,m.index).split("\n").length,kind:"макрос"};
     return null;
   }
   function gotoDefinition(word){
@@ -134,10 +134,10 @@
         window.A7Project.open(file.path);
         gotoLine(found.line);
       }
-      const lineText=(file.content||"").split("\\n")[found.line-1]||"";
+      const lineText=(file.content||"").split("\n")[found.line-1]||"";
       const col=lineText.indexOf(word);
       if(col>=0){
-        const lineStart=(file.content||"").split("\\n").slice(0,found.line-1).reduce((n,x)=>n+x.length+1,0);
+        const lineStart=(file.content||"").split("\n").slice(0,found.line-1).reduce((n,x)=>n+x.length+1,0);
         editor.setSelectionRange(lineStart+col,lineStart+col+word.length);
       }
       setStatus("Дефиниция на "+word+" ("+found.kind+"): "+file.path+":"+found.line);

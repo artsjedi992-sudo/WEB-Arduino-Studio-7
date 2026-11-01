@@ -2,13 +2,19 @@
 (function(){
  "use strict";
  const $=id=>document.getElementById(id), output=$("output-console"), problems=$("problems-list");
- const recentKey="a7-recent-files-v1";
+ 
  function log(s){output.textContent+="\n["+new Date().toLocaleTimeString()+"] "+s;output.scrollTop=output.scrollHeight;}
  function status(s){$("status-message").textContent=s;}
  function ask(title,message,initial){return window.prompt(title+"\n"+message,initial||"");}
  async function save(){try{await window.A7Project.save();status("Проектът е записан локално");log("Записани са всички файлове от проекта в IndexedDB.");}catch(e){log("Грешка при запис: "+e.message);}}
  function download(name,text,type){const a=document.createElement("a"),url=URL.createObjectURL(new Blob([text],{type:type||"text/plain;charset=utf-8"}));a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1200);}
- function saveActive(){const d=window.A7Editor.current();if(!d)return;d.content=$("code-editor").value;download(d.name,d.content);d.dirty=false;status("Изтеглен файл: "+d.name);}
+ async function saveActive(){
+  const d=window.A7Editor.current();if(!d)return;
+  d.content=$("code-editor").value;
+  window.A7Project.documentChanged(d);
+  try{await window.A7Project.save();download(d.name,d.content);status("Файлът е записан и изтеглен: "+d.name);}
+  catch(e){log("Грешка при запис: "+e.message);}
+}
  function newFile(ext){let name=ask("Нов файл","Име на файла:",ext===".ino"?"new_sketch.ino":"new_file"+ext);if(!name)return;if(!/\.[A-Za-z0-9]+$/.test(name))name+=ext;window.A7Project.add({name,path:name,content:ext===".ino"?"// Нов Arduino скеч\n\nvoid setup() {\n}\n\nvoid loop() {\n}\n":""});}
  function newSketch(){newFile(".ino");}
  function openFiles(){ $("file-input").click(); }

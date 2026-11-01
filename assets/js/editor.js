@@ -59,7 +59,7 @@
   const keywords="void bool byte char int long short float double unsigned signed const static volatile if else for while do switch case break continue return class struct enum typedef using namespace public private protected virtual override constexpr auto sizeof new delete true false HIGH LOW INPUT OUTPUT INPUT_PULLUP";
   const builtins="pinMode digitalWrite digitalRead analogRead analogWrite delay delayMicroseconds millis micros attachInterrupt detachInterrupt Serial setup loop";
   function escape(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
-  function highlight(){/* Изключен е наслагваният слой, който причиняваше двойни и размазани символи. */const old=document.getElementById("syntax-layer");if(old)old.remove();}
+  function highlight(){if(window.A7Syntax)window.A7Syntax.render(editor);}
 
   // Автодовършване с често използвани Arduino/C++ шаблони.
   function completion(){
@@ -96,7 +96,7 @@
   function showContext(x,y){removePopup();const items=[["Изрежи",()=>document.execCommand("cut")],["Копирай",()=>document.execCommand("copy")],["Постави",()=>document.execCommand("paste")],["Дублирай ред/избор",duplicate],["Коментирай / разкоментирай",toggleLineComment],["Огради с /* */",blockComment],["Отиди към дефиниция",()=>gotoDefinition(wordAt(editor.selectionStart))],["Намери",()=>window.A7App.askFind()],["Замени",()=>window.A7App.askReplace()]];popup=document.createElement("div");popup.className="a7-popup";items.forEach(([name,fn])=>{const b=document.createElement("button");b.textContent=name;b.onclick=()=>{fn();removePopup();};popup.append(b);});popup.style.left=Math.min(x,innerWidth-260)+"px";popup.style.top=Math.min(y,innerHeight-340)+"px";document.body.append(popup);}
   editor.addEventListener("input",()=>{sync();updateCursor();highlight();});
   editor.addEventListener("scroll",()=>{numbers.scrollTop=editor.scrollTop;const l=document.getElementById("syntax-layer");if(l){l.scrollTop=editor.scrollTop;l.scrollLeft=editor.scrollLeft;}});
-  editor.addEventListener("click",updateCursor);editor.addEventListener("keyup",updateCursor);
+  editor.addEventListener("click",()=>{updateCursor();highlight();});editor.addEventListener("keyup",()=>{updateCursor();highlight();});
   editor.addEventListener("contextmenu",e=>{e.preventDefault();showContext(e.clientX,e.clientY);});
   editor.addEventListener("mousemove",e=>{clearTimeout(hintTimer);const pos=editor.selectionStart,w=wordAt(pos);if(!w)return;hintTimer=setTimeout(()=>{const detail=keywords.split(" ").includes(w)?"Ключова дума на C++":builtins.split(" ").includes(w)?"Вградена Arduino функция":"Ctrl+щракване: търси дефиниция";editor.title=w+" — "+detail;},500);});
   editor.addEventListener("mousedown",e=>{if(e.ctrlKey){const w=wordAt(editor.selectionStart);if(gotoDefinition(w))e.preventDefault();}});

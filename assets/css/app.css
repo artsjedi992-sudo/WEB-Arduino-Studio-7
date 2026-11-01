@@ -61,3 +61,54 @@ button:focus,select:focus,textarea:focus{outline:1px solid var(--accent);outline
 .serial-actions input{flex:1;min-width:0;background:#171c23;color:#eee;border:1px solid var(--border);padding:6px}
 #serial-data{white-space:pre-wrap;max-height:90px;overflow:auto}
 @media(max-width:700px){.a7-popup{max-width:85vw}.toolbar{overflow-x:auto;white-space:nowrap}}
+
+
+/* Светла тема в стил Windows / Visual Studio. */
+:root{color-scheme:light;--bg:#f3f3f3;--panel:#f7f7f7;--panel2:#ededed;--border:#d2d2d2;--text:#202020;--muted:#666;--accent:#0078d4;--green:#16834a;--editor:#ffffff}
+html,body{background:#f3f3f3;color:#202020;color-scheme:light}
+.titlebar{background:#f3f3f3;color:#202020;border-bottom:1px solid #d4d4d4}
+.brand{color:#202020}.brand small{color:#087e65}.project-title{color:#555}
+button,select{background:#fff;color:#202020;border:1px solid #c8c8c8;border-radius:3px}
+button:hover{background:#e9f2fb;border-color:#8ab9e2}
+button:focus,select:focus,textarea:focus{outline:1px solid #0078d4;outline-offset:-1px}
+.title-actions .primary{background:#e5f1fb;color:#005a9e;border-color:#83b7df}
+.menubar{background:#f3f3f3;border-bottom:1px solid #d4d4d4}
+.menubar button{color:#222}.menubar button:hover{background:#e5e5e5}
+.toolbar{background:#fafafa;border-bottom:1px solid #d5d5d5;color:#222}
+.toolbar label,.editor-toolbar{color:#555}
+.toolbar select{background:#fff;color:#202020}
+.toolbar-separator{border-color:#d0d0d0}
+.connection-state{color:#666}
+.workspace{background:#fff}
+.explorer{background:#f7f7f7;border-right:1px solid #d0d0d0}
+.panel-heading{color:#555}
+.project-root{color:#303030}
+.file-item{color:#303030}
+.file-item:hover{background:#eaf3fb;color:#111}
+.file-item.active{background:#dcecf9;color:#064d80;border-left:3px solid #0078d4;padding-left:24px}
+.file-icon{color:#b07822}
+.explorer-footer{border-color:#ddd;color:#666}
+.editor-area{background:#fff}
+.tabbar{background:#f0f0f0;border-bottom:1px solid #d0d0d0}
+.tab{color:#444;border-color:#d4d4d4}
+.tab.active{background:#fff;color:#111;border-top:2px solid #0078d4}
+.tab .close{color:#555}.tab .close:hover{color:#000}
+.editor-toolbar{background:#fff;border-bottom:1px solid #eee}
+.editor-wrap{background:#fff}
+.line-numbers{background:#f7f7f7;color:#858585;border-right:1px solid #e5e5e5}
+#code-editor{position:relative;z-index:2;background:#fff!important;color:#202020!important;caret-color:#111;padding:12px 14px;font:14px/21px Consolas,"Courier New",monospace;white-space:pre;tab-size:4;overflow:auto;text-shadow:none}
+#code-editor::selection{background:#add6ff;color:#111}
+.statusbar{background:#007acc;color:#fff}
+.bottom-panel{background:#f7f7f7;border-top:1px solid #ccc}
+.bottom-tabs{border-color:#d5d5d5}
+.bottom-tabs button{color:#444}
+.bottom-tabs button.selected{color:#005a9e;border-bottom:2px solid #0078d4}
+#output-console{background:#fff;color:#333;border-top:1px solid #ddd}
+#problems-list,#serial-panel{background:#fff;color:#222}
+.problem-item{color:#8a5100}
+.serial-actions input{background:#fff;color:#222;border:1px solid #c8c8c8}
+#serial-data{color:#222}
+.a7-popup{background:#fff;color:#202020;border:1px solid #bdbdbd;box-shadow:0 5px 18px #0002}
+.a7-popup button{background:transparent;color:#202020}
+.a7-popup button:hover{background:#e5f1fb;color:#111}
+.tree-folder{color:#333}

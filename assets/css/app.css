@@ -204,3 +204,29 @@ button:active{transform:translateY(1px)}
  .titlebar{background:linear-gradient(105deg,#174f7c,#1769aa)}
  .menubar{overflow-x:auto;white-space:nowrap}
 }
+
+/* Синтактично оцветяване: прецизно подравняване с textarea, без двойни символи. */
+.editor-wrap{position:relative;isolation:isolate}
+#syntax-layer{
+ position:absolute;z-index:1;left:48px;right:0;top:0;bottom:0;margin:0;
+ padding:12px 14px;overflow:hidden;pointer-events:none;white-space:pre;
+ tab-size:4;font:14px/21px Consolas,"Courier New",monospace;
+ color:#202020;background:#fff;border:0;
+}
+#code-editor{
+ position:relative;z-index:2;background:transparent!important;
+ color:transparent!important;-webkit-text-fill-color:transparent;
+ caret-color:#111;text-shadow:none;
+ font:14px/21px Consolas,"Courier New",monospace;
+ padding:12px 14px;tab-size:4;white-space:pre;
+}
+#code-editor::selection{background:#9ccafa;color:transparent}
+.tok-keyword{color:#0000c0;font-weight:600}
+.tok-type{color:#2676a8;font-weight:600}
+.tok-builtin{color:#7952a1}
+.tok-function{color:#795e26}
+.tok-string{color:#a31515}
+.tok-comment{color:#008000;font-style:italic}
+.tok-number{color:#098658}
+.tok-preproc{color:#af00db;font-weight:600}
+.tok-bracket{background:#ffe08a;outline:1px solid #d39b25;color:#111!important;font-weight:bold}

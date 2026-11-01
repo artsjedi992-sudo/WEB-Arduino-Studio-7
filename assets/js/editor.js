@@ -139,17 +139,19 @@
       }
       if(!found)continue;
       if(active&&file.path===active.path){
+        // Вече сме в правилния документ – позиционираме се в началото на дефиницията.
         gotoLine(found.line);
       }else{
+        // Отварянето на файл активира документа синхронно; след това местим курсора.
         window.A7Project.open(file.path);
-        gotoLine(found.line);
       }
-      const lineText=(file.content||"").split("\n")[found.line-1]||"";
-      const col=lineText.indexOf(matchedWord);
-      if(col>=0){
-        const lineStart=(file.content||"").split("\n").slice(0,found.line-1).reduce((n,x)=>n+x.length+1,0);
-        editor.setSelectionRange(lineStart+col,lineStart+col+matchedWord.length);
-      }
+      // Курсорът остава в началото на реда с дефиницията.
+      // Не маркираме името, за да няма оцветяване и визуално неточно позициониране.
+      const sourceLines=(file.content||"").split("\n");
+      const lineStart=sourceLines.slice(0,found.line-1).reduce((n,line)=>n+line.length+1,0);
+      editor.setSelectionRange(lineStart,lineStart);
+      cm.scrollIntoView(cm.posFromIndex(lineStart),80);
+      updateCursor();
       setStatus("Дефиниция на "+word+" ("+found.kind+"): "+file.path+":"+found.line);
       return true;
     }

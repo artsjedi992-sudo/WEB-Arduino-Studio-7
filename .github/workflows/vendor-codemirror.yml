@@ -10,7 +10,6 @@ permissions:
 
 jobs:
   vendor:
-    if: ${{ !hashFiles('assets/vendor/codemirror/codemirror.js') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -19,9 +18,20 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Check if already vendored
+        id: check
+        shell: bash
+        run: |
+          if [ -s assets/vendor/codemirror/codemirror.js ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          fi
       - name: Install CodeMirror 5
+        if: steps.check.outputs.present == 'false'
         run: npm install --no-save --ignore-scripts codemirror@5.65.21
       - name: Copy browser distribution
+        if: steps.check.outputs.present == 'false'
         run: |
           mkdir -p assets/vendor/codemirror/mode/clike assets/vendor/codemirror/addon/fold assets/vendor/codemirror/addon/edit assets/vendor/codemirror/addon/selection assets/vendor/codemirror/addon/comment assets/vendor/codemirror/addon/hint
           cp node_modules/codemirror/lib/codemirror.js assets/vendor/codemirror/codemirror.js
@@ -38,9 +48,10 @@ jobs:
           cp node_modules/codemirror/addon/hint/show-hint.css assets/vendor/codemirror/addon/hint/show-hint.css
           cp node_modules/codemirror/LICENSE assets/vendor/codemirror/LICENSE
       - name: Commit vendored library
+        if: steps.check.outputs.present == 'false'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add assets/vendor/codemirror
-          git commit -m "Vendor CodeMirror 5.65.21" || exit 0
+          git commit -m "Vendor CodeMirror 5.65.21"
           git push

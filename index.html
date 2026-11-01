@@ -2,45 +2,43 @@
 <html lang="bg">
 <head>
   <meta charset="utf-8">
-  <!-- Адаптивен изглед за настолни компютри и по-стари браузъри. -->
+  <!-- Адаптивен интерфейс за настолни и по-стари браузъри. -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#20252d">
   <title>Arduino Studio 7 Web</title>
   <link rel="stylesheet" href="assets/css/app.css">
 </head>
 <body>
-  <!-- Горна лента с име на проекта и основните команди. -->
+  <!-- Заглавна лента и бързи команди. -->
   <header class="titlebar">
     <div class="brand"><span class="brand-mark">A7</span><span>Arduino Studio <b>7</b> <small>WEB</small></span></div>
     <div class="project-title" id="project-title">Моят Arduino проект</div>
-    <div class="title-actions"><button id="btn-new" title="Нов проект">＋ Нов</button><button id="btn-open" title="Отвори файл">Отвори</button><button id="btn-save" class="primary" title="Запази">Запази</button></div>
+    <div class="title-actions"><button id="btn-new" title="Нов скеч">＋ Нов</button><button id="btn-open" title="Отвори файл">Отвори</button><button id="btn-save" class="primary" title="Запиши проекта">Запиши</button></div>
   </header>
-
-  <!-- Главно меню; командите са достъпни и от клавиатурата. -->
+  <!-- Основни менюта; съдържанието им се изгражда от app.js. -->
   <nav class="menubar" aria-label="Главно меню">
-    <button data-menu="file">Файл</button><button data-menu="edit">Редактиране</button><button data-menu="sketch">Скетч</button><button data-menu="tools">Инструменти</button><button data-menu="help">Помощ</button>
+    <button data-menu="file">Файл</button><button data-menu="edit">Редактиране</button><button data-menu="project">Проект</button><button data-menu="sketch">Скетч</button><button data-menu="tools">Инструменти</button><button data-menu="window">Прозорец</button><button data-menu="help">Помощ</button>
   </nav>
-
-  <!-- Лента с бързи действия и избор на целева платка. -->
+  <!-- Лента с компилация, качване, FQBN и порт. -->
   <section class="toolbar">
-    <button id="btn-verify" title="Проверка на кода">✓ Проверка</button>
-    <button id="btn-upload" title="Качване към платка">⇧ Качване</button>
+    <button id="btn-verify" title="Предварителна проверка">✓ Провери / Компилирай</button>
+    <button id="btn-upload" title="Качване към платката">⇧ Качи</button>
     <span class="toolbar-separator"></span>
-    <label for="board-select">Платка:</label>
-    <select id="board-select"><option value="uno">Arduino Uno</option><option value="nano">Arduino Nano</option><option value="mega">Arduino Mega 2560</option></select>
-    <label for="port-select">Порт:</label><select id="port-select"><option value="">Не е избран</option></select>
+    <label for="board-select">Платка / FQBN:</label>
+    <select id="board-select">
+      <option value="arduino:avr:uno">Arduino Uno</option><option value="arduino:avr:nano">Arduino Nano</option><option value="arduino:avr:mega">Arduino Mega 2560</option><option value="arduino:avr:leonardo">Arduino Leonardo</option><option value="arduino:avr:micro">Arduino Micro</option><option value="arduino:megaavr:uno2018">Uno WiFi Rev2</option>
+    </select>
+    <button id="serial-connect" title="Избери сериен порт">Порт…</button>
     <span class="connection-state" id="connection-state">● Само редактор</span>
   </section>
-
-  <!-- Работната зона съдържа файлов браузър, редактор и долна конзола. -->
+  <!-- Работна зона с дърво на проекта, табове и редактор. -->
   <main class="workspace">
     <aside class="explorer">
-      <div class="panel-heading"><span>ПРОЕКТ</span><button id="btn-add-file" title="Добави файл">＋</button></div>
+      <div class="panel-heading"><span>EXPLORER / ПРОЕКТ</span><button id="btn-add-file" title="Нов C++ файл">＋</button></div>
       <div class="project-root"><span>▾</span> <b id="tree-project-name">Моят проект</b></div>
       <div id="file-tree" class="file-tree"></div>
       <div class="explorer-footer">Локален проект · IndexedDB</div>
     </aside>
-
     <section class="editor-area">
       <div class="tabbar" id="tabbar"></div>
       <div class="editor-toolbar"><span id="active-file-label">sketch.ino</span><span id="editor-language">C++ / Arduino</span></div>
@@ -48,20 +46,22 @@
         <div class="line-numbers" id="line-numbers">1</div>
         <textarea id="code-editor" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Редактор на Arduino код"></textarea>
       </div>
-      <div class="statusbar"><span id="status-message">Готово</span><span id="cursor-position">Ред 1, Колона 1</span><span>UTF-8</span><span>CRLF</span></div>
+      <div class="statusbar"><span id="status-message">Готово</span><span id="cursor-position">Ред 1, Колона 1</span><span>UTF-8</span><span>Arduino / C++</span></div>
     </section>
   </main>
-
-  <!-- Долният панел показва съобщенията от проверка и действията. -->
+  <!-- Долен панел: изход, проблеми и сериен монитор. -->
   <section class="bottom-panel">
     <div class="bottom-tabs"><button class="selected" data-output-tab="output">Изход</button><button data-output-tab="problems">Проблеми</button><button data-output-tab="serial">Сериен монитор</button><span class="spacer"></span><button id="btn-clear-output">Изчисти</button></div>
-    <pre id="output-console" aria-live="polite">Arduino Studio 7 Web е стартиран.
-Редакторът и локалното съхранение са готови.
-Компилаторът и качването към платка все още не са интегрирани.</pre>
+    <pre id="output-console" aria-live="polite">Arduino Studio 7 Web е стартиран.</pre>
+    <div id="problems-list" hidden></div>
+    <div id="serial-panel" hidden>
+      <div id="serial-info">Серийният монитор проверява възможностите на браузъра.</div>
+      <pre id="serial-data"></pre>
+      <div class="serial-actions"><input id="serial-send" placeholder="Текст за изпращане…"><button id="serial-send-button">Изпрати</button></div>
+    </div>
   </section>
-
-  <!-- Скритите входове позволяват отваряне на файлове без инсталация. -->
-  <input id="file-input" type="file" accept=".ino,.h,.hpp,.c,.cpp,.txt,.json" hidden>
+  <!-- Изборът на файлове и папки става през стандартния браузърен диалог. -->
+  <input id="file-input" type="file" accept=".ino,.h,.hpp,.c,.cpp,.txt,.json" multiple hidden>
   <input id="project-input" type="file" webkitdirectory directory multiple hidden>
   <script src="assets/js/storage.js"></script>
   <script src="assets/js/editor.js"></script>

@@ -231,7 +231,8 @@
     }
     if(e.key==="Tab"){e.preventDefault();if(editor.selectionStart!==editor.selectionEnd)indent(true);else replaceSelection("  ");}
     if(mod&&k==="s"){e.preventDefault();window.A7App.save();}
-    if(e.key==="F12"){e.preventDefault();gotoDefinition(wordAt(editor.selectionStart));return;}\n    if(mod&&k==="space"){e.preventDefault();completion();}
+    if(e.key==="F12"){e.preventDefault();gotoDefinition(wordAt(editor.selectionStart));return;}
+    if(mod&&k==="space"){e.preventDefault();completion();}
     if(mod&&k==="d"){e.preventDefault();duplicate();}
     if(mod&&k==="/"){e.preventDefault();toggleLineComment();}
     if(mod&&k==="f"){e.preventDefault();window.A7App.askFind();}

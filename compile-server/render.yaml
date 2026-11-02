@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: arduino-studio-7-compiler
+    runtime: docker
+    dockerfilePath: ./compile-server/Dockerfile
+    dockerContext: .
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: ALLOWED_ORIGINS
+        value: https://artsjedi992-sudo.github.io

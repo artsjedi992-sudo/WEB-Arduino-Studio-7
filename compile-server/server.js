@@ -4,7 +4,6 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
 import { spawn } from "node:child_process";
-import { randomUUID } from "node:crypto";
 
 const app = express();
 const PORT = Number(process.env.PORT || 8080);
@@ -75,10 +74,13 @@ app.post("/api/compile", async (req, res) => {
     await fs.mkdir(buildDir, { recursive: true });
 
     let primaryInoWritten = false;
+    const firstIno = sourceFiles.find(f => /\\.ino$/i.test(String(f.name || f.path || "")));
+    const firstInoPath = safeRelativePath(String(firstIno.path || firstIno.name));
+    const projectPrefix = firstInoPath.includes("/") ? firstInoPath.slice(0, firstInoPath.lastIndexOf("/") + 1) : "";
     for (const file of sourceFiles) {
       const original = safeRelativePath(String(file.path || file.name));
       const basename = path.basename(original);
-      let relative = original.includes("/") ? original : basename;
+      let relative = projectPrefix && original.startsWith(projectPrefix) ? original.slice(projectPrefix.length) : original;
       if (/\.ino$/i.test(relative) && !primaryInoWritten) {
         relative = sketchName + ".ino";
         primaryInoWritten = true;
@@ -93,7 +95,8 @@ app.post("/api/compile", async (req, res) => {
 
     const result = await run("arduino-cli", [
       "compile", "--fqbn", fqbn, "--warnings", "all", "--export-binaries",
-      "--build-path", path.join(buildDir, "tmp"), "--output-dir", buildDir, sketchDir
+      "--build-path", path.join(buildDir, "tmp"), "--output-dir", buildDir,
+      "--libraries", path.join(sketchDir, "libraries"), sketchDir
     ], work);
     const artifacts = await fs.readdir(buildDir);
     const hexName = artifacts.find(name => name.toLowerCase().endsWith(".hex"));

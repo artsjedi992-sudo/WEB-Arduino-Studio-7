@@ -4,9 +4,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certifi
 RUN curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
 RUN arduino-cli config init && arduino-cli core update-index && arduino-cli core install arduino:avr
 WORKDIR /app
-COPY package.json package-lock.json* ./
+COPY compile-server/package.json ./
 RUN npm install --omit=dev
-COPY server.js ./
+COPY compile-server/server.js ./
 ENV PORT=8080
 EXPOSE 8080
 CMD ["npm", "start"]

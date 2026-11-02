@@ -75,7 +75,7 @@ app.post("/api/compile", async (req, res) => {
     await fs.mkdir(path.join(sketchDir, "libraries"), { recursive: true });
 
     let primaryInoWritten = false;
-    const firstIno = sourceFiles.find(f => /\\.ino$/i.test(String(f.name || f.path || "")));
+    const firstIno = sourceFiles.find(f => /\.ino$/i.test(String(f.name || f.path || "")));
     const firstInoPath = safeRelativePath(String(firstIno.path || firstIno.name));
     const projectPrefix = firstInoPath.includes("/") ? firstInoPath.slice(0, firstInoPath.lastIndexOf("/") + 1) : "";
     for (const file of sourceFiles) {

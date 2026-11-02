@@ -318,3 +318,73 @@ body.theme-dark .menubar{background:#283544}
 body.theme-dark .menu-glyph,body.theme-dark .tool-glyph{color:#9bd2f4}
 body.theme-dark .panel-reveal{background:#263e52;color:#e7f4ff;border-color:#52748e}
 @media(max-width:700px){.menubar{overflow-x:auto;white-space:nowrap}.menubar button{padding:3px 7px}.toolbar{overflow-x:auto;white-space:nowrap}.panel-reveal-left{top:45%;padding:8px 5px}}
+
+
+/* Компактна, заоблена навигация по образеца на Jolium. */
+.menubar{
+  height:28px;
+  gap:3px;
+  padding:0 9px;
+  background:#edf3f8;
+}
+.menubar button{
+  height:23px;
+  min-height:23px;
+  padding:2px 8px;
+  gap:5px;
+  border:1px solid transparent;
+  border-radius:7px;
+  background:transparent;
+  font-size:11px;
+  line-height:17px;
+  font-weight:500;
+  white-space:nowrap;
+  transition:background .12s ease,border-color .12s ease;
+}
+.menubar button:hover,
+.menubar button:focus{
+  background:#fff;
+  border-color:#d4e2ed;
+}
+.menubar button:active{background:#dcebf7}
+.menu-glyph{
+  width:13px;
+  height:13px;
+  font-size:12px;
+  opacity:.9;
+}
+.a7-menu-popup{
+  min-width:190px;
+  padding:4px;
+  border-radius:9px;
+  border-color:#d6e0e9;
+  box-shadow:0 7px 22px rgba(25,55,80,.18);
+}
+.a7-menu-popup button{
+  min-height:24px;
+  padding:4px 8px;
+  gap:7px;
+  border-radius:6px;
+  font-size:11px;
+  line-height:16px;
+}
+.a7-menu-popup button:hover{
+  background:#eaf3fb;
+}
+.a7-menu-popup button .menu-item-glyph{
+  width:15px;
+  height:15px;
+  flex-basis:15px;
+  font-size:12px;
+}
+@media(max-width:700px){
+  .menubar{height:27px;gap:2px;padding:0 5px}
+  .menubar button{height:22px;padding:2px 6px;font-size:10px}
+}
+body.theme-dark .menubar{background:#253444}
+body.theme-dark .menubar button{color:#e5edf5}
+body.theme-dark .menubar button:hover,
+body.theme-dark .menubar button:focus{background:#344b60;border-color:#49657c}
+body.theme-dark .a7-menu-popup{background:#253444;border-color:#49657c}
+body.theme-dark .a7-menu-popup button{color:#e5edf5}
+body.theme-dark .a7-menu-popup button:hover{background:#344b60}

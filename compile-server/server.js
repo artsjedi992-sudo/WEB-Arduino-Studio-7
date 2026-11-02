@@ -43,7 +43,7 @@ function run(command, args, cwd, timeoutMs = 180000) {
 
 function safeRelativePath(value) {
   if (typeof value !== "string" || !value.trim()) throw new Error("Невалиден път на файл.");
-  const normalized = value.replaceAll("\\\\", "/");
+  const normalized = value.replaceAll("\\", "/");
   if (normalized.startsWith("/") || /^[A-Za-z]:/.test(normalized) || normalized.split("/").some(p => !p || p === "." || p === "..")) {
     throw new Error("Небезопасен път на файл: " + value);
   }

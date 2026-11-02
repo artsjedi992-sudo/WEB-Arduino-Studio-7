@@ -293,3 +293,28 @@ body.theme-dark .editor-wrap .CodeMirror-activeline-background{background:#202d3
 body.theme-dark .editor-wrap .CodeMirror-cursor{border-left-color:#fff}
 body.theme-dark .editor-wrap .CodeMirror-selected{background:#345878}
 body.theme-dark .editor-wrap .CodeMirror-matchingbracket{color:#fff!important;background:#285b43}
+
+/* Компактна лента и постоянни контроли за възстановяване на панелите. */
+.menubar{height:30px;gap:1px;padding:0 8px;background:#eaf2f8}
+.menubar button{height:27px;display:inline-flex;align-items:center;gap:6px;padding:3px 9px;font-size:12px;font-weight:600;border-radius:3px}
+.menu-glyph{display:inline-grid;place-items:center;width:15px;height:15px;font-size:13px;line-height:1;color:#2477a8}
+.toolbar{height:36px;gap:5px;padding:0 9px}
+.toolbar button{height:27px;padding:3px 8px;font-size:12px;border-radius:3px}
+.tool-icon-button{display:inline-flex;align-items:center;gap:5px}
+.tool-glyph{font-size:14px;line-height:1;color:#7057a8}
+.titlebar{height:42px;gap:14px;padding:0 10px}
+.brand{font-size:14px}.brand-mark{width:26px;height:26px}
+.title-actions button{height:27px;padding:3px 9px;font-size:12px}
+.a7-popup{min-width:205px;max-width:300px;padding:4px;border-radius:4px}
+.a7-popup button{min-height:27px;padding:5px 9px;font-size:12px;line-height:1.25}
+.a7-menu-popup button{display:flex;align-items:center;gap:9px;min-height:26px}
+.a7-menu-popup button .menu-item-glyph{display:inline-grid;place-items:center;width:17px;height:17px;flex:0 0 17px;color:#287aa8;font-size:13px}
+.a7-menu-popup button .menu-item-label{flex:1}
+.panel-reveal{display:none;position:fixed;z-index:10001;align-items:center;justify-content:center;gap:6px;border:1px solid #8eb8d5;background:#e5f2fc;color:#174f7c;box-shadow:0 2px 9px #244e6b35;font-size:11px;font-weight:600}
+.panel-reveal-left{left:0;top:48%;border-radius:0 5px 5px 0;padding:9px 7px;writing-mode:vertical-rl}
+.panel-reveal .reveal-icon{font-size:15px;writing-mode:horizontal-tb}
+body.explorer-collapsed #btn-show-explorer{display:flex}
+body.theme-dark .menubar{background:#283544}
+body.theme-dark .menu-glyph,body.theme-dark .tool-glyph{color:#9bd2f4}
+body.theme-dark .panel-reveal{background:#263e52;color:#e7f4ff;border-color:#52748e}
+@media(max-width:700px){.menubar{overflow-x:auto;white-space:nowrap}.menubar button{padding:3px 7px}.toolbar{overflow-x:auto;white-space:nowrap}.panel-reveal-left{top:45%;padding:8px 5px}}

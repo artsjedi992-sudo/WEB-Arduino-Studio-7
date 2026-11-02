@@ -10,12 +10,12 @@
   let value = "";
   try { value = localStorage.getItem(ENDPOINT_KEY) || ""; } catch (_) {}
   if (!value) {
-   value = window.prompt("Адрес на Arduino Studio 7 компилационния сървър (например https://your-service.onrender.com):", "");
+   value = window.prompt("Адрес на Arduino Studio 7 компилационния сървър:", "");
    if (!value) return "";
-   value = value.trim().replace(/\\/$/, "");
+   value = value.trim().replace(/\/$/, "");
    try { localStorage.setItem(ENDPOINT_KEY, value); } catch (_) {}
   }
-  return value.replace(/\\/$/, "");
+  return value.replace(/\/$/, "");
  }
 
  function projectFiles(){
@@ -46,10 +46,9 @@
 
  async function compile(){
   const files = projectFiles();
-  const ino = files.filter(f => /\\.ino$/i.test(f.name || f.path));
-  if (!ino.length) return {success:false, message:"В проекта няма .ino файл."};
+  if (!files.some(f => /\.ino$/i.test(f.name || f.path))) return {success:false, message:"В проекта няма .ino файл."};
   const url = endpoint();
-  if (!url) return {success:false, message:"Компилацията е отказана: не е зададен адрес на компилационен сървър."};
+  if (!url) return {success:false, message:"Не е зададен адрес на компилационен сървър."};
   const fqbn = $("board-select").value;
   showLog("Започва истинска компилация с Arduino CLI за " + fqbn + "…");
   $("status-message").textContent = "Компилиране…";
@@ -61,17 +60,16 @@
    });
    const result = await response.json();
    if (!response.ok || !result.success) {
-    const log = result.log || result.message || ("HTTP " + response.status);
-    showLog(log);
+    showLog(result.log || result.message || ("HTTP " + response.status));
     $("status-message").textContent = "Грешка при компилация";
-    return {success:false, message:"Компилацията е неуспешна. Вижте разделите Изход и Проблеми.", log};
+    return {success:false, message:"Компилацията е неуспешна. Вижте конзолата Изход."};
    }
    showLog(result.log || "Компилацията премина успешно.");
    showLog("Успешна компилация. HEX: " + result.hex.name + " (" + result.hex.bytes + " bytes).");
    downloadBase64(result.hex);
    if (result.elf) downloadBase64(result.elf);
    $("status-message").textContent = "Компилацията е успешна";
-   return {success:true, message:"Компилацията е успешна. HEX файлът е изтеглен.", log:result.log};
+   return {success:true, message:"Компилацията е успешна. HEX файлът е изтеглен."};
   } catch(error) {
    $("status-message").textContent = "Няма връзка с компилатора";
    return {success:false, message:"Не може да се достигне компилационният сървър: " + error.message};
@@ -79,12 +77,12 @@
  }
 
  async function upload(){
-  return {success:false,message:"Качването към платката е изключено. На този етап се компилира и генерира HEX файл בלבד."};
+  return {success:false,message:"Качването към платката е изключено. Засега се генерира само HEX файл."};
  }
 
  function validate(){
   const files=projectFiles(),problems=[];
-  if(!files.some(f=>/\\.ino$/i.test(f.name||f.path))) problems.push({file:"*.ino",line:1,message:"Липсва Arduino .ino файл."});
+  if(!files.some(f=>/\.ino$/i.test(f.name||f.path))) problems.push({file:"*.ino",line:1,message:"Липсва Arduino .ino файл."});
   return problems;
  }
  window.A7Compiler={compile,upload,validate,configure(){try{localStorage.removeItem(ENDPOINT_KEY);}catch(_){}return endpoint();}};

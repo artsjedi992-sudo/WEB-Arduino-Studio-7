@@ -9,6 +9,7 @@
   const bottom=document.querySelector(".bottom-panel");
   const bottomSplitter=document.getElementById("bottom-splitter");
   const hideExplorer=document.getElementById("btn-toggle-explorer");
+  const showExplorer=document.getElementById("btn-show-explorer");
   const hideBottom=document.getElementById("btn-hide-bottom");
   const showBottom=document.getElementById("btn-toggle-bottom");
 
@@ -34,7 +35,7 @@
     body.style.setProperty("--a7-bottom-height",bottomHeight+"px");
     if(hideExplorer) hideExplorer.textContent=body.classList.contains("explorer-collapsed")?"▶":"◀";
     if(hideExplorer) hideExplorer.title=body.classList.contains("explorer-collapsed")?"Покажи Explorer":"Скрий Explorer";
-    if(showBottom) showBottom.textContent=body.classList.contains("bottom-collapsed")?"Покажи долен панел":"Долен панел";
+    if(showBottom){const collapsed=body.classList.contains("bottom-collapsed");showBottom.innerHTML=collapsed?"<span class=\"tool-glyph\">▤</span><span>Покажи изход</span>":"<span class=\"tool-glyph\">▤</span><span>Скрий изход</span>";showBottom.title=collapsed?"Покажи долния панел":"Скрий долния панел";showBottom.setAttribute("aria-expanded",String(!collapsed));}
   }
 
   // Записва настройките отделно от файловете на проекта.
@@ -89,6 +90,9 @@
     apply();
     persist();
   });
+
+  // Бутонът извън Explorer винаги може да го върне след скриване.
+  if(showExplorer) showExplorer.addEventListener("click",function(){body.classList.remove("explorer-collapsed");apply();persist();});
 
   // Скрива долния панел от неговата лента.
   if(hideBottom) hideBottom.addEventListener("click",function(){

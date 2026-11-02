@@ -72,6 +72,7 @@ app.post("/api/compile", async (req, res) => {
     const buildDir = path.join(work, "build");
     await fs.mkdir(sketchDir, { recursive: true });
     await fs.mkdir(buildDir, { recursive: true });
+    await fs.mkdir(path.join(sketchDir, "libraries"), { recursive: true });
 
     let primaryInoWritten = false;
     const firstIno = sourceFiles.find(f => /\\.ino$/i.test(String(f.name || f.path || "")));

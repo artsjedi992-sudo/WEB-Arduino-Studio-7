@@ -84,5 +84,5 @@
   if(!files.some(f=>/\.ino$/i.test(f.name||f.path))) problems.push({file:"*.ino",line:1,message:"Липсва Arduino .ino файл."});
   return problems;
  }
- window.A7Compiler={compile,upload,validate,configure(){let current=endpoint();let value=window.prompt("Адрес на локалния Arduino CLI посредник:",current||LOCAL_ENDPOINT);if(value===null)return current;value=value.trim().replace(/\\/$/,"");if(value){try{localStorage.setItem(ENDPOINT_KEY,value);}catch(_){}}return value;}};
+ window.A7Compiler={compile,upload,validate,configure(){let current=endpoint();let value=window.prompt("Адрес на локалния Arduino CLI посредник:",current||LOCAL_ENDPOINT);if(value===null)return current;value=value.trim().replace(/\/$/,"");if(value){try{localStorage.setItem(ENDPOINT_KEY,value);}catch(_){}}return value;}};
 })();

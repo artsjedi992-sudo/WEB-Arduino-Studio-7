@@ -118,7 +118,7 @@ while ($listener.IsListening) {
         $ino = $null
         foreach ($f in $files) { if ([string]$f["name"] -match "\.ino$") { $ino = $f; break } }
         if (-not $ino) {
-            Send-Json $res 400 @{ success = $false; message = "? ??????? ???? .ino ????." }
+            Send-Json $res 400 @{ success = $false; message = "Project does not contain an .ino file." }
             continue
         }
 

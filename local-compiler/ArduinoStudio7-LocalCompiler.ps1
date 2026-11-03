@@ -52,7 +52,7 @@ $listener.Prefixes.Add("http://127.0.0.1:$Port/")
 try { $listener.Start() } catch {
     Write-Host "Could not open local port $Port. It may already be in use." -ForegroundColor Red
     Write-Host $_.Exception.Message
-    Read-Host "????????? Enter ?? ?????"
+    Read-Host "Press Enter to exit"
     exit 1
 }
 

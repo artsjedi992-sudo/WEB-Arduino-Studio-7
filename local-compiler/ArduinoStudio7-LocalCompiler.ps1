@@ -1,4 +1,4 @@
-# Arduino Studio 7 Web - локален посредник за Arduino CLI
+﻿# Arduino Studio 7 Web - локален посредник за Arduino CLI
 # Стартирайте чрез Start-LocalCompiler.bat. Не е необходимо администраторско стартиране.
 $ErrorActionPreference = "Stop"
 
@@ -22,7 +22,7 @@ function Send-Json($response, $status, $obj) {
 
 function Safe-RelativePath([string]$value) {
     $p = $value.Replace("\", "/")
-    if ([string]::IsNullOrWhiteSpace($p) -or $p.StartsWith("/") -or $p -match "^[A-Za-z]:" -or $p -match "(^|/)\.\.(/|$)") {
+    if ([string]::IsNullOrEmpty($p) -or $p.Trim().Length -eq 0 -or $p.StartsWith("/") -or $p -match "^[A-Za-z]:" -or $p -match "(^|/)\.\.(/|$)") {
         throw "Невалиден път на файл: $value"
     }
     return $p

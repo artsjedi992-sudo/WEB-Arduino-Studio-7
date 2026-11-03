@@ -1,18 +1,16 @@
-/* Истинска компилация чрез отделен Arduino CLI сървър.
-   Този сайт е статичен GitHub Pages сайт и не може сам да стартира AVR-GCC.
-   Адресът на компилационната услуга се задава еднократно от потребителя. */
+/* Истинска локална компилация чрез Arduino CLI на компютъра на потребителя.
+   Браузърът изпраща файловете към локалния PowerShell посредник. */
 (function(){
  "use strict";
  const ENDPOINT_KEY = "a7-compiler-endpoint";
+ const LOCAL_ENDPOINT = "http://127.0.0.1:8765";
  const $ = id => document.getElementById(id);
 
  function endpoint(){
   let value = "";
   try { value = localStorage.getItem(ENDPOINT_KEY) || ""; } catch (_) {}
   if (!value) {
-   value = window.prompt("Адрес на Arduino Studio 7 компилационния сървър:", "");
-   if (!value) return "";
-   value = value.trim().replace(/\/$/, "");
+   value = LOCAL_ENDPOINT;
    try { localStorage.setItem(ENDPOINT_KEY, value); } catch (_) {}
   }
   return value.replace(/\/$/, "");
@@ -48,9 +46,10 @@
   const files = projectFiles();
   if (!files.some(f => /\.ino$/i.test(f.name || f.path))) return {success:false, message:"В проекта няма .ino файл."};
   const url = endpoint();
-  if (!url) return {success:false, message:"Не е зададен адрес на компилационен сървър."};
+  if (!url) return {success:false, message:"Не е зададен адрес на локалния компилатор."};
   const fqbn = $("board-select").value;
-  showLog("Започва истинска компилация с Arduino CLI за " + fqbn + "…");
+  showLog("Използва се локален Arduino CLI: " + url);
+  showLog("Започва истинска компилация за " + fqbn + "…");
   $("status-message").textContent = "Компилиране…";
   try {
    const response = await fetch(url + "/api/compile", {
@@ -72,7 +71,7 @@
    return {success:true, message:"Компилацията е успешна. HEX файлът е изтеглен."};
   } catch(error) {
    $("status-message").textContent = "Няма връзка с компилатора";
-   return {success:false, message:"Не може да се достигне компилационният сървър: " + error.message};
+   return {success:false, message:"Не може да се достигне локалният Arduino CLI. Стартирайте local-compiler\\Start-LocalCompiler.bat и опитайте отново. Подробности: " + error.message};
   }
  }
 
@@ -85,5 +84,5 @@
   if(!files.some(f=>/\.ino$/i.test(f.name||f.path))) problems.push({file:"*.ino",line:1,message:"Липсва Arduino .ino файл."});
   return problems;
  }
- window.A7Compiler={compile,upload,validate,configure(){try{localStorage.removeItem(ENDPOINT_KEY);}catch(_){}return endpoint();}};
+ window.A7Compiler={compile,upload,validate,configure(){let current=endpoint();let value=window.prompt("Адрес на локалния Arduino CLI посредник:",current||LOCAL_ENDPOINT);if(value===null)return current;value=value.trim().replace(/\\/$/,"");if(value){try{localStorage.setItem(ENDPOINT_KEY,value);}catch(_){}}return value;}};
 })();

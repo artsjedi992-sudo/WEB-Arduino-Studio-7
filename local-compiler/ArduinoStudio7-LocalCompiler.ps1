@@ -1,5 +1,5 @@
-﻿# Arduino Studio 7 Web - локален посредник за Arduino CLI
-# Стартирайте чрез Start-LocalCompiler.bat. Не е необходимо администраторско стартиране.
+# Arduino Studio 7 Web - ??????? ????????? ?? Arduino CLI
+# ??????????? ???? Start-LocalCompiler.bat. ?? ? ?????????? ???????????????? ??????????.
 $ErrorActionPreference = "Stop"
 
 $Port = 8765
@@ -23,25 +23,25 @@ function Send-Json($response, $status, $obj) {
 function Safe-RelativePath([string]$value) {
     $p = $value.Replace("\", "/")
     if ([string]::IsNullOrEmpty($p) -or $p.Trim().Length -eq 0 -or $p.StartsWith("/") -or $p -match "^[A-Za-z]:" -or $p -match "(^|/)\.\.(/|$)") {
-        throw "Невалиден път на файл: $value"
+        throw "????????? ??? ?? ????: $value"
     }
     return $p
 }
 
 Write-Host ""
-Write-Host "Arduino Studio 7 - локален компилатор" -ForegroundColor Cyan
-Write-Host "Порт: http://127.0.0.1:$Port"
+Write-Host "Arduino Studio 7 - ??????? ??????????" -ForegroundColor Cyan
+Write-Host "????: http://127.0.0.1:$Port"
 Write-Host ""
 
 $Cli = $DefaultCli
 if (-not (Test-Path -LiteralPath $Cli)) {
-    Write-Host "Не е намерен Arduino CLI на стандартния път:" -ForegroundColor Yellow
+    Write-Host "?? ? ??????? Arduino CLI ?? ??????????? ???:" -ForegroundColor Yellow
     Write-Host $Cli
-    $Cli = Read-Host "Въведете пълния път до arduino-cli.exe"
+    $Cli = Read-Host "???????? ?????? ??? ?? arduino-cli.exe"
 }
 if (-not (Test-Path -LiteralPath $Cli)) {
-    Write-Host "ГРЕШКА: Файлът arduino-cli.exe не е намерен." -ForegroundColor Red
-    Read-Host "Натиснете Enter за изход"
+    Write-Host "??????: ?????? arduino-cli.exe ?? ? ???????." -ForegroundColor Red
+    Read-Host "????????? Enter ?? ?????"
     exit 1
 }
 $Cli = (Resolve-Path -LiteralPath $Cli).Path
@@ -50,14 +50,14 @@ Write-Host "Arduino CLI: $Cli" -ForegroundColor Green
 $listener = New-Object System.Net.HttpListener
 $listener.Prefixes.Add("http://127.0.0.1:$Port/")
 try { $listener.Start() } catch {
-    Write-Host "Не може да се отвори локалният порт $Port. Възможно е вече да се използва." -ForegroundColor Red
+    Write-Host "?? ???? ?? ?? ?????? ????????? ???? $Port. ???????? ? ???? ?? ?? ????????." -ForegroundColor Red
     Write-Host $_.Exception.Message
-    Read-Host "Натиснете Enter за изход"
+    Read-Host "????????? Enter ?? ?????"
     exit 1
 }
 
-Write-Host "Готово. Оставете този прозорец отворен, докато използвате IDE." -ForegroundColor Green
-Write-Host "За спиране натиснете Ctrl+C."
+Write-Host "??????. ???????? ???? ???????? ???????, ?????? ?????????? IDE." -ForegroundColor Green
+Write-Host "?? ??????? ????????? Ctrl+C."
 Write-Host ""
 
 while ($listener.IsListening) {
@@ -88,15 +88,15 @@ while ($listener.IsListening) {
         }
 
         if ($req.Url.AbsolutePath -ne "/api/compile" -or $req.HttpMethod -ne "POST") {
-            Send-Json $res 404 @{ success = $false; message = "Непознат адрес." }
+            Send-Json $res 404 @{ success = $false; message = "???????? ?????." }
             continue
         }
         if ($origin -ne $AllowedOrigin) {
-            Send-Json $res 403 @{ success = $false; message = "Заявката не е от разрешения Arduino Studio 7 сайт." }
+            Send-Json $res 403 @{ success = $false; message = "???????? ?? ? ?? ?????????? Arduino Studio 7 ????." }
             continue
         }
         if ($req.ContentLength64 -gt 12582912) {
-            Send-Json $res 413 @{ success = $false; message = "Проектът е по-голям от 12 MB." }
+            Send-Json $res 413 @{ success = $false; message = "???????? ? ??-????? ?? 12 MB." }
             continue
         }
 
@@ -107,18 +107,18 @@ while ($listener.IsListening) {
         $fqbn = [string]$data["fqbn"]
         $allowedBoards = @("arduino:avr:uno","arduino:avr:nano","arduino:avr:mega","arduino:avr:leonardo","arduino:avr:micro","arduino:megaavr:uno2018")
         if ($allowedBoards -notcontains $fqbn) {
-            Send-Json $res 400 @{ success = $false; message = "Неподдържана платка: $fqbn" }
+            Send-Json $res 400 @{ success = $false; message = "???????????? ??????: $fqbn" }
             continue
         }
         $files = $data["files"]
         if (-not $files -or $files.Count -gt 200) {
-            Send-Json $res 400 @{ success = $false; message = "Няма файлове или са повече от 200." }
+            Send-Json $res 400 @{ success = $false; message = "???? ??????? ??? ?? ?????? ?? 200." }
             continue
         }
         $ino = $null
         foreach ($f in $files) { if ([string]$f["name"] -match "\.ino$") { $ino = $f; break } }
         if (-not $ino) {
-            Send-Json $res 400 @{ success = $false; message = "В проекта няма .ino файл." }
+            Send-Json $res 400 @{ success = $false; message = "? ??????? ???? .ino ????." }
             continue
         }
 
@@ -151,20 +151,20 @@ while ($listener.IsListening) {
             $proc = Start-Process -FilePath "$env:ComSpec" -ArgumentList $cmdLine -PassThru -WindowStyle Hidden
             if (-not $proc.WaitForExit(180000)) {
                 try { $proc.Kill() } catch {}
-                $log = "Компилацията надхвърли лимита от 180 секунди."
+                $log = "???????????? ????????? ?????? ?? 180 ???????."
                 Send-Json $res 504 @{ success = $false; message = $log; log = $log }
                 continue
             }
             $log = ""
             if (Test-Path -LiteralPath $logFile) { $log = [System.IO.File]::ReadAllText($logFile) }
             if ($proc.ExitCode -ne 0) {
-                Send-Json $res 422 @{ success = $false; message = "Компилацията е неуспешна."; log = $log }
+                Send-Json $res 422 @{ success = $false; message = "???????????? ? ?????????."; log = $log }
                 continue
             }
 
             $hexFile = Get-ChildItem -LiteralPath $sketchDir -Filter "*.hex" -Recurse | Select-Object -First 1
             if (-not $hexFile) {
-                Send-Json $res 500 @{ success = $false; message = "Arduino CLI завърши без грешка, но HEX файлът не беше намерен."; log = $log }
+                Send-Json $res 500 @{ success = $false; message = "Arduino CLI ??????? ??? ??????, ?? HEX ?????? ?? ???? ???????."; log = $log }
                 continue
             }
             $hexBytes = [System.IO.File]::ReadAllBytes($hexFile.FullName)

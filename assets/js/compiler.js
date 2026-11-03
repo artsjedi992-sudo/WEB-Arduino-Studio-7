@@ -54,7 +54,7 @@
   try {
    const response = await fetch(url + "/api/compile", {
     method:"POST",
-    headers:{"Content-Type":"application/json"},
+    headers:{"Content-Type":"text/plain;charset=UTF-8"},
     body:JSON.stringify({fqbn, files})
    });
    const result = await response.json();

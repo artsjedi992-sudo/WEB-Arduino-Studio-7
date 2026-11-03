@@ -1,5 +1,5 @@
-# Arduino Studio 7 Web - ??????? ????????? ?? Arduino CLI
-# ??????????? ???? Start-LocalCompiler.bat. ?? ? ?????????? ???????????????? ??????????.
+# Arduino Studio 7 Web - local Arduino CLI bridge
+# Start with Start-LocalCompiler.bat. Administrator privileges are not required.
 $ErrorActionPreference = "Stop"
 
 $Port = 8765
@@ -23,25 +23,25 @@ function Send-Json($response, $status, $obj) {
 function Safe-RelativePath([string]$value) {
     $p = $value.Replace("\", "/")
     if ([string]::IsNullOrEmpty($p) -or $p.Trim().Length -eq 0 -or $p.StartsWith("/") -or $p -match "^[A-Za-z]:" -or $p -match "(^|/)\.\.(/|$)") {
-        throw "????????? ??? ?? ????: $value"
+        throw "Invalid file path: $value"
     }
     return $p
 }
 
 Write-Host ""
-Write-Host "Arduino Studio 7 - ??????? ??????????" -ForegroundColor Cyan
-Write-Host "????: http://127.0.0.1:$Port"
+Write-Host "Arduino Studio 7 - Local Compiler" -ForegroundColor Cyan
+Write-Host "Address: http://127.0.0.1:$Port"
 Write-Host ""
 
 $Cli = $DefaultCli
 if (-not (Test-Path -LiteralPath $Cli)) {
-    Write-Host "?? ? ??????? Arduino CLI ?? ??????????? ???:" -ForegroundColor Yellow
+    Write-Host "Arduino CLI was not found at the default location:" -ForegroundColor Yellow
     Write-Host $Cli
-    $Cli = Read-Host "???????? ?????? ??? ?? arduino-cli.exe"
+    $Cli = Read-Host "Enter the full path to arduino-cli.exe"
 }
 if (-not (Test-Path -LiteralPath $Cli)) {
-    Write-Host "??????: ?????? arduino-cli.exe ?? ? ???????." -ForegroundColor Red
-    Read-Host "????????? Enter ?? ?????"
+    Write-Host "ERROR: arduino-cli.exe was not found." -ForegroundColor Red
+    Read-Host "Press Enter to exit"
     exit 1
 }
 $Cli = (Resolve-Path -LiteralPath $Cli).Path
@@ -50,14 +50,14 @@ Write-Host "Arduino CLI: $Cli" -ForegroundColor Green
 $listener = New-Object System.Net.HttpListener
 $listener.Prefixes.Add("http://127.0.0.1:$Port/")
 try { $listener.Start() } catch {
-    Write-Host "?? ???? ?? ?? ?????? ????????? ???? $Port. ???????? ? ???? ?? ?? ????????." -ForegroundColor Red
+    Write-Host "Could not open local port $Port. It may already be in use." -ForegroundColor Red
     Write-Host $_.Exception.Message
     Read-Host "????????? Enter ?? ?????"
     exit 1
 }
 
-Write-Host "??????. ???????? ???? ???????? ???????, ?????? ?????????? IDE." -ForegroundColor Green
-Write-Host "?? ??????? ????????? Ctrl+C."
+Write-Host "Ready. Keep this window open while using the IDE." -ForegroundColor Green
+Write-Host "Press Ctrl+C to stop."
 Write-Host ""
 
 while ($listener.IsListening) {
@@ -88,15 +88,15 @@ while ($listener.IsListening) {
         }
 
         if ($req.Url.AbsolutePath -ne "/api/compile" -or $req.HttpMethod -ne "POST") {
-            Send-Json $res 404 @{ success = $false; message = "???????? ?????." }
+            Send-Json $res 404 @{ success = $false; message = "Unknown endpoint." }
             continue
         }
         if ($origin -ne $AllowedOrigin) {
-            Send-Json $res 403 @{ success = $false; message = "???????? ?? ? ?? ?????????? Arduino Studio 7 ????." }
+            Send-Json $res 403 @{ success = $false; message = "Request origin is not the authorized Arduino Studio 7 website." }
             continue
         }
         if ($req.ContentLength64 -gt 12582912) {
-            Send-Json $res 413 @{ success = $false; message = "???????? ? ??-????? ?? 12 MB." }
+            Send-Json $res 413 @{ success = $false; message = "Project is larger than 12 MB." }
             continue
         }
 
@@ -107,12 +107,12 @@ while ($listener.IsListening) {
         $fqbn = [string]$data["fqbn"]
         $allowedBoards = @("arduino:avr:uno","arduino:avr:nano","arduino:avr:mega","arduino:avr:leonardo","arduino:avr:micro","arduino:megaavr:uno2018")
         if ($allowedBoards -notcontains $fqbn) {
-            Send-Json $res 400 @{ success = $false; message = "???????????? ??????: $fqbn" }
+            Send-Json $res 400 @{ success = $false; message = "Unsupported board: $fqbn" }
             continue
         }
         $files = $data["files"]
         if (-not $files -or $files.Count -gt 200) {
-            Send-Json $res 400 @{ success = $false; message = "???? ??????? ??? ?? ?????? ?? 200." }
+            Send-Json $res 400 @{ success = $false; message = "No files supplied or more than 200 files." }
             continue
         }
         $ino = $null
@@ -151,20 +151,20 @@ while ($listener.IsListening) {
             $proc = Start-Process -FilePath "$env:ComSpec" -ArgumentList $cmdLine -PassThru -WindowStyle Hidden
             if (-not $proc.WaitForExit(180000)) {
                 try { $proc.Kill() } catch {}
-                $log = "???????????? ????????? ?????? ?? 180 ???????."
+                $log = "Compilation exceeded the 180-second time limit."
                 Send-Json $res 504 @{ success = $false; message = $log; log = $log }
                 continue
             }
             $log = ""
             if (Test-Path -LiteralPath $logFile) { $log = [System.IO.File]::ReadAllText($logFile) }
             if ($proc.ExitCode -ne 0) {
-                Send-Json $res 422 @{ success = $false; message = "???????????? ? ?????????."; log = $log }
+                Send-Json $res 422 @{ success = $false; message = "Compilation failed."; log = $log }
                 continue
             }
 
             $hexFile = Get-ChildItem -LiteralPath $sketchDir -Filter "*.hex" -Recurse | Select-Object -First 1
             if (-not $hexFile) {
-                Send-Json $res 500 @{ success = $false; message = "Arduino CLI ??????? ??? ??????, ?? HEX ?????? ?? ???? ???????."; log = $log }
+                Send-Json $res 500 @{ success = $false; message = "Arduino CLI finished successfully, but no HEX file was found."; log = $log }
                 continue
             }
             $hexBytes = [System.IO.File]::ReadAllBytes($hexFile.FullName)

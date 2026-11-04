@@ -22,30 +22,30 @@
   const current = window.A7Editor.current();
   const currentByPath = new Map(opened.map(f => [f.path || f.name, f]));
   const files = all.map(f => {
-   const path = String(f.path || f.name).replace(/\\\\/g, "/");
+   const path = String(f.path || f.name).replace(/\\/g, "/");
    const doc = currentByPath.get(f.path) || currentByPath.get(path) || currentByPath.get(f.name);
    return { path, name: f.name || path.split("/").pop(), content: doc ? doc.content : f.content };
   });
-  const isIno = f => /\\.ino$/i.test(f.name || f.path);
+  const isIno = f => /\.ino$/i.test(f.name || f.path);
   let main = current && isIno(current)
-   ? files.find(f => f.path === String(current.path || current.name).replace(/\\\\/g, "/"))
+   ? files.find(f => f.path === String(current.path || current.name).replace(/\\/g, "/"))
    : null;
   if (!main) {
-   const activePath = window.A7Project.activePath && String(window.A7Project.activePath()).replace(/\\\\/g, "/");
+   const activePath = window.A7Project.activePath && String(window.A7Project.activePath()).replace(/\\/g, "/");
    main = files.find(f => f.path === activePath && isIno(f)) || files.find(isIno);
   }
   if (!main) return { files: [], main: null, excluded: [] };
   const parentOf = path => path.includes("/") ? path.slice(0, path.lastIndexOf("/")) : "";
   const parent = parentOf(main.path);
   const siblings = files.filter(f => parentOf(f.path) === parent);
-  const mainHasSetup = /\\b(?:void\\s+)?setup\\s*\\(/m.test(main.content || "");
-  const mainHasLoop = /\\b(?:void\\s+)?loop\\s*\\(/m.test(main.content || "");
+  const mainHasSetup = /\b(?:void\s+)?setup\s*\(/m.test(main.content || "");
+  const mainHasLoop = /\b(?:void\s+)?loop\s*\(/m.test(main.content || "");
   const selected = [];
   const excluded = [];
   siblings.forEach(f => {
    if (isIno(f) && f.path !== main.path) {
-    const hasSetup = /\\b(?:void\\s+)?setup\\s*\\(/m.test(f.content || "");
-    const hasLoop = /\\b(?:void\\s+)?loop\\s*\\(/m.test(f.content || "");
+    const hasSetup = /\b(?:void\s+)?setup\s*\(/m.test(f.content || "");
+    const hasLoop = /\b(?:void\s+)?loop\s*\(/m.test(f.content || "");
     if ((hasSetup && mainHasSetup) || (hasLoop && mainHasLoop)) {
      excluded.push(f.path);
      return;

@@ -157,13 +157,16 @@ while ($listener.IsListening) {
             }
             $log = ""
             if (Test-Path -LiteralPath $logFile) { $log = [System.IO.File]::ReadAllText($logFile) }
-            $log += "`r`nArduino CLI process exit code: " + $proc.ExitCode
-            if ($proc.ExitCode -ne 0) {
+            $proc.Refresh()
+            $exitCode = $proc.ExitCode
+            if ($null -eq $exitCode) { $exitCode = -1 }
+            $log += "`r`nArduino CLI process exit code: " + $exitCode
+            if ([int]$exitCode -ne 0) {
                 $generated = @((Get-ChildItem -LiteralPath $sketchDir -Filter "*.hex" -Recurse | ForEach-Object { $_.FullName })) + @((Get-ChildItem -LiteralPath $sketchDir -Filter "*.elf" -Recurse | ForEach-Object { $_.FullName }))
                 if ($generated.Count -gt 0 -and $log -match "Sketch uses [0-9]+ bytes") {
                     $log += "`r`nA HEX/ELF artifact exists and the memory report was produced; treating this as a successful build despite the non-zero wrapper exit code."
                 } else {
-                    Send-Json $res 422 @{ success = $false; message = ("Arduino CLI returned exit code " + $proc.ExitCode + "."); log = $log }
+                    Send-Json $res 422 @{ success = $false; message = ("Arduino CLI returned exit code " + $exitCode + "."); log = $log }
                     continue
                 }
             }
